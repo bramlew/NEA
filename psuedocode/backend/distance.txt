@@ -1,0 +1,14 @@
+PROCEDURE GreatCircleDistance(longitude_1, latitude_1, longitude_2, latitude_2)
+    VAR lambda_1 = toRad(longitude_1)
+    VAR lambda_2 = toRad(longitude_2)
+    VAR phi_1 = toRad(latitude_1)
+    VAR phi_2 = toRad(latitude_2)
+
+    VAR c = MATH.arccos(MATH.sin(phi_1) * MATH.sin(phi_2) + MATH.cos(phi_1) * MATH.cos(phi_2) * MATH.cos(MATH.abs(lambda_2 - lambda_1)))
+    VAR d = R * c
+    RETURN d
+ENDPROCEDURE
+
+PROCEDURE toRad(deg)
+    RETURN deg * MATH.PI / 180
+ENDPROCEDURE

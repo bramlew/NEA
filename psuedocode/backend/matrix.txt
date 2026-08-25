@@ -1,0 +1,24 @@
+TYPE coordinates
+    FIELD Longitude TYPE Float
+    FIELD Latitude TYPE Float
+ENDTYPE
+
+PROCEDURE ConstructMatrix(coordinates)
+    matrix = []
+    FOR i IN RANGE coordinates.length DO
+        FOR j IN RANGE coordinates.length DO
+            actualIndex = lookupIndex(i, j, coordinates.length)
+            IF NOT i = j THEN
+                matrix[actualIndex] = GreatCircleDistance(coordinates[i].Longitude, coordinates[i].latitude,
+                coordinates[j].longitude, coordinates[j].latitude)
+            ELSE THEN
+                matrix[actualIndex] = MATH.INFINITY
+            ENDIF
+        ENDFOR
+    ENDFOR
+    RETURN matrix, coordinates.length
+ENDPROCEDURE
+
+PROCEDURE lookupIndex(i, j, cols)
+    RETURN i * cols + j
+ENDPROCEDURE
