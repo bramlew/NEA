@@ -43,11 +43,11 @@ func LookupIndex(i int, j int, cols int) int {
 	return i*cols + j
 }
 
-func PrintMatrix(m *models.Matrix) {
+func PrintMatrix(mat *models.Matrix) {
 	// Output every item in the matrix to the console
 	var printStr string
-	for i, route := range m.Matrix {
-		if i%m.Cols == 0 {
+	for i, route := range mat.Matrix {
+		if i%mat.Cols == 0 {
 			printStr += "\n"
 		}
 		printStr += fmt.Sprintf("%g", route.Distance) + "      "
@@ -55,9 +55,9 @@ func PrintMatrix(m *models.Matrix) {
 	fmt.Println(printStr)
 }
 
-func ParseJsonResponse(m *models.Matrix) {
+func ParseJsonResponse(mat *models.Matrix) {
 	// Replace all occurrences of infinity length as zero, as infinity cannot be passed back into JSON
-	for _, route := range m.Matrix {
+	for _, route := range mat.Matrix {
 		if math.IsInf(route.Distance, 1) {
 			route.Distance = 0
 		}
