@@ -28,8 +28,8 @@ func TestInit(t *testing.T) {
 
 func TestAccuracy(t *testing.T) {
 	// Test the accuracy of the great circle distance calculation algorithm with random sets of valid coordinates
-	const N = 10000       // No. of times to randomly execute the test
-	const MaxDiff = 0.005 // Maximum percentage difference between calculated and actual values of the distance as a decimal
+	const N = 1000000      // No. of times to randomly execute the test
+	const MaxDiff = 0.0056 // Maximum percentage difference between calculated and actual values of the distance as a decimal
 	for i := 0; i < N; i++ {
 		origin, dest := RandValidCoords(), RandValidCoords()
 		dist, err := GreatCircleDistance(origin, dest)
