@@ -15,23 +15,23 @@ func TestMatrixValidity(t *testing.T) {
 		locations[i] = RandValidCoords()
 	}
 
-	m, err := ConstructMatrix(locations)
+	mat, err := ConstructMatrix(locations)
 	if err != nil {
 		t.Errorf("error constructing matrix: %v", err)
 	}
 	for i, origin := range locations {
 		for j, dest := range locations {
-			matrixDistance := m.Matrix[LookupIndex(i, j, m.Cols)].Distance
+			matDist := mat.Matrix[LookupIndex(i, j, mat.Cols)].Distance
 			if i != j {
-				d, err := GreatCircleDistance(origin, dest)
+				dist, err := GreatCircleDistance(origin, dest)
 				if err != nil {
 					t.Errorf("error calculating great circle distance: %v", err)
 				}
-				if d != matrixDistance {
-					t.Errorf("expected distance %v at index [%v, %v], got %v", d, i, j, matrixDistance)
+				if dist != matDist {
+					t.Errorf("expected distance %v at index [%v, %v], got %v", dist, i, j, matDist)
 				}
-			} else if !math.IsInf(matrixDistance, 1) {
-				t.Errorf("expected infinite distance at index [%v, %v], got %v", i, j, matrixDistance)
+			} else if !math.IsInf(matDist, 1) {
+				t.Errorf("expected infinite distance at index [%v, %v], got %v", i, j, matDist)
 			}
 		}
 	}

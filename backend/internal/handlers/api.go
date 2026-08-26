@@ -10,11 +10,11 @@ import (
 
 func Start() {
 	// Start the Gin server and route(s)
-	r := gin.Default()
+	router := gin.Default()
 
-	r.POST("/optimise", optimise)
+	router.POST("/optimise", optimise)
 
-	err := r.Run(":8080")
+	err := router.Run(":8080")
 	if err != nil {
 		return
 	}
@@ -30,12 +30,12 @@ func optimise(c *gin.Context) {
 	}
 	// If the request does have valid syntax, construct a matrix of distances between the coordinates sent
 	coords := req.Coordinates
-	m, err := algorithm.ConstructMatrix(coords)
+	mat, err := algorithm.ConstructMatrix(coords)
 	if err != nil {
 		// Return an error if the matrix construction fails
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
 		return
 	}
-	algorithm.ParseJsonResponse(m)
-	c.JSON(http.StatusOK, gin.H{"matrix": m})
+	algorithm.ParseJsonResponse(mat)
+	c.JSON(http.StatusOK, gin.H{"matrix": mat})
 }

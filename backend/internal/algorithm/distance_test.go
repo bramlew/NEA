@@ -31,13 +31,13 @@ func TestAccuracy(t *testing.T) {
 	const N int = 10000 // No. of times to randomly execute the test
 	for i := 0; i < N; i++ {
 		origin, dest := RandValidCoords(), RandValidCoords()
-		d, err := GreatCircleDistance(origin, dest)
-		actD := geodesic.WGS84.Inverse(origin.Lat, origin.Lon, dest.Lat, dest.Lon).S12 / 1000
+		dist, err := GreatCircleDistance(origin, dest)
+		actualDist := geodesic.WGS84.Inverse(origin.Lat, origin.Lon, dest.Lat, dest.Lon).S12 / 1000
 		if err != nil {
 			t.Errorf("error calculating great circle distance: %v", err)
 		}
-		if math.Abs(d-actD)/actD >= 0.005 {
-			t.Errorf("calculated distance is not within expected error range, expected maximum 0.5%% error, got %.2f%%", math.Abs(d-actD)/actD*100)
+		if diff := math.Abs(dist-actualDist) / actualDist; diff >= 0.005 {
+			t.Errorf("calculated distance is not within expected error range, expected maximum 0.5%% error, got %.2f%% error (calculated %.2fkm, expected %.2fkm)", diff*100, dist, actualDist)
 		}
 	}
 }

@@ -15,25 +15,25 @@ func ConstructMatrix(coords []models.Coords) (*models.Matrix, error) {
 	length := len(coords)
 	// Store the matrix as a flat array instead of a 2D array, as this speeds up indexing time, you just need to store the
 	// no. of columns along with the actual matrix.
-	m := make([]*models.Route, length*length)
+	mat := make([]*models.Route, length*length)
 	for i, origin := range coords {
 		for j, dest := range coords {
 			// For every possible origin and destination coordinate pair, calculate the great-circle distance between them.
 			// If the origin and destination are the same, set the distance to infinity.
 			index := LookupIndex(i, j, length)
 			if i != j {
-				distance, err := GreatCircleDistance(origin, dest)
+				dist, err := GreatCircleDistance(origin, dest)
 				if err != nil {
 					return nil, err
 				}
-				m[index] = &models.Route{Distance: distance}
+				mat[index] = &models.Route{Distance: dist}
 			} else {
-				m[index] = &models.Route{Distance: inf}
+				mat[index] = &models.Route{Distance: inf}
 			}
 		}
 	}
 	return &models.Matrix{
-		Matrix: m,
+		Matrix: mat,
 		Cols:   length,
 	}, nil
 }
@@ -57,9 +57,9 @@ func PrintMatrix(m *models.Matrix) {
 
 func ParseJsonResponse(m *models.Matrix) {
 	// Replace all occurrences of infinity length as zero, as infinity cannot be passed back into JSON
-	for _, r := range m.Matrix {
-		if math.IsInf(r.Distance, 1) {
-			r.Distance = 0
+	for _, route := range m.Matrix {
+		if math.IsInf(route.Distance, 1) {
+			route.Distance = 0
 		}
 	}
 }
