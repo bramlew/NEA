@@ -30,7 +30,12 @@ func optimise(c *gin.Context) {
 	}
 	// If the request does have valid syntax, construct a matrix of distances between the coordinates sent
 	coords := req.Coordinates
-	m := algorithm.ConstructMatrix(coords)
+	m, err := algorithm.ConstructMatrix(coords)
+	if err != nil {
+		// Return an error if the matrix construction fails
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	algorithm.ParseJsonResponse(m)
 	c.JSON(http.StatusOK, gin.H{"matrix": m})
 }

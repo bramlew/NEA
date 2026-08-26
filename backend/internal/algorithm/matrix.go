@@ -7,7 +7,7 @@ import (
 	"github.com/bramlew/NEA/backend/internal/models"
 )
 
-func ConstructMatrix(coords []models.Coords) *models.Matrix {
+func ConstructMatrix(coords []models.Coords) (*models.Matrix, error) {
 	// Construct and return a distance adjacency matrix for a given slice of coordinates
 
 	// Define initial constants/values
@@ -16,13 +16,17 @@ func ConstructMatrix(coords []models.Coords) *models.Matrix {
 	// Store the matrix as a flat array instead of a 2D array, as this speeds up indexing time, you just need to store the
 	// no. of columns along with the actual matrix.
 	m := make([]*models.Route, length*length)
-	for i, o := range coords {
-		for j, d := range coords {
+	for i, origin := range coords {
+		for j, dest := range coords {
 			// For every possible origin and destination coordinate pair, calculate the great-circle distance between them.
 			// If the origin and destination are the same, set the distance to infinity.
 			index := lookupIndex(i, j, length)
 			if i != j {
-				m[index] = &models.Route{Distance: GreatCircleDistance(o, d)}
+				distance, err := GreatCircleDistance(origin, dest)
+				if err != nil {
+					return nil, err
+				}
+				m[index] = &models.Route{Distance: distance}
 			} else {
 				m[index] = &models.Route{Distance: inf}
 			}
@@ -31,7 +35,7 @@ func ConstructMatrix(coords []models.Coords) *models.Matrix {
 	return &models.Matrix{
 		Matrix: m,
 		Cols:   length,
-	}
+	}, nil
 }
 
 func lookupIndex(i int, j int, cols int) int {
