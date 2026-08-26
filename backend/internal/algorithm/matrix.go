@@ -20,7 +20,7 @@ func ConstructMatrix(coords []models.Coords) (*models.Matrix, error) {
 		for j, dest := range coords {
 			// For every possible origin and destination coordinate pair, calculate the great-circle distance between them.
 			// If the origin and destination are the same, set the distance to infinity.
-			index := lookupIndex(i, j, length)
+			index := LookupIndex(i, j, length)
 			if i != j {
 				distance, err := GreatCircleDistance(origin, dest)
 				if err != nil {
@@ -38,7 +38,7 @@ func ConstructMatrix(coords []models.Coords) (*models.Matrix, error) {
 	}, nil
 }
 
-func lookupIndex(i int, j int, cols int) int {
+func LookupIndex(i int, j int, cols int) int {
 	// Returns the flat index from a given 2D index
 	return i*cols + j
 }
