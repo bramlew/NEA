@@ -27,8 +27,9 @@ func TestInit(t *testing.T) {
 }
 
 func TestAccuracy(t *testing.T) {
-	// Test the accuracy of the great circle distance calculation algorithm with random valid and invalid sets of coordinates
-	const N int = 10000 // No. of times to randomly execute the test
+	// Test the accuracy of the great circle distance calculation algorithm with random sets of valid coordinates
+	const N = 10000       // No. of times to randomly execute the test
+	const MaxDiff = 0.005 // Maximum percentage difference between calculated and actual values of the distance as a decimal
 	for i := 0; i < N; i++ {
 		origin, dest := RandValidCoords(), RandValidCoords()
 		dist, err := GreatCircleDistance(origin, dest)
@@ -36,7 +37,7 @@ func TestAccuracy(t *testing.T) {
 		if err != nil {
 			t.Errorf("error calculating great circle distance: %v", err)
 		}
-		if diff := math.Abs(dist-actualDist) / actualDist; diff >= 0.005 {
+		if diff := math.Abs(dist-actualDist) / actualDist; diff >= MaxDiff {
 			t.Errorf("calculated distance is not within expected error range, expected maximum 0.5%% error, got %.2f%% error (calculated %.2fkm, expected %.2fkm)", diff*100, dist, actualDist)
 		}
 	}

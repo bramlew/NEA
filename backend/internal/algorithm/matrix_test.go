@@ -21,8 +21,10 @@ func TestMatrixValidity(t *testing.T) {
 	}
 	for i, origin := range locations {
 		for j, dest := range locations {
+			// Iterate through all the pairs of locations
 			matDist := mat.Matrix[LookupIndex(i, j, mat.Cols)].Distance
 			if i != j {
+				// If the current item is not on the diagonal, check that the matrix distance and calculated distance are exactly equal to not raise an error
 				dist, err := GreatCircleDistance(origin, dest)
 				if err != nil {
 					t.Errorf("error calculating great circle distance: %v", err)
@@ -31,6 +33,7 @@ func TestMatrixValidity(t *testing.T) {
 					t.Errorf("expected distance %v at index [%v, %v], got %v", dist, i, j, matDist)
 				}
 			} else if !math.IsInf(matDist, 1) {
+				// If it is on the diagonal, check that the matrix distance is infinity
 				t.Errorf("expected infinite distance at index [%v, %v], got %v", i, j, matDist)
 			}
 		}
