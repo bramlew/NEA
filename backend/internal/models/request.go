@@ -1,6 +1,6 @@
 package models
 
 type Request struct {
-	Coordinates []Coords `json:"coordinates" binding:"required"`
-	Weight      float64  `json:"weight"`
+	Locations []Coords `json:"locations" binding:"required"`
+	Weight    float64  `json:"weight"`
 }
