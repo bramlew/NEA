@@ -9,7 +9,7 @@ import (
 
 func TestInit(t *testing.T) {
 	// Test that the great circle distance calculation algorithm does not produce an error using random valid and invalid sets of coordinates
-	const N int = 10 // No. of times to randomly execute the tests
+	const N = 10 // No. of times to randomly execute the tests
 	for i := 0; i < N; i++ {
 		// Test some valid coordinates
 		_, err := GreatCircleDistance(RandValidCoords(), RandValidCoords())
