@@ -38,7 +38,7 @@ func TestAccuracy(t *testing.T) {
 			t.Errorf("error calculating great circle distance: %v", err)
 		}
 		if diff := math.Abs(dist-actualDist) / actualDist; diff >= MaxDiff {
-			t.Errorf("calculated distance is not within expected error range, expected maximum 0.5%% error, got %.2f%% error (calculated %.2fkm, expected %.2fkm)", diff*100, dist, actualDist)
+			t.Errorf("calculated distance is not within expected error range, expected maximum 0.56%% error, got %.2f%% error (calculated %.2fkm, expected %.2fkm)", diff*100, dist, actualDist)
 		}
 	}
 }
