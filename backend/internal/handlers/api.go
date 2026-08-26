@@ -33,7 +33,7 @@ func optimise(c *gin.Context) {
 	m, err := algorithm.ConstructMatrix(coords)
 	if err != nil {
 		// Return an error if the matrix construction fails
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
 		return
 	}
 	algorithm.ParseJsonResponse(m)
