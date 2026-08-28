@@ -1,0 +1,18 @@
+FUNCTION threeOpt(mat, baseline)
+    VAR route = baseline
+    VAR optimal = FALSE
+    WHILE NOT optimal DO
+        optimal = TRUE
+        VAR perms = genThreeEdgePerms(route)
+        VAR currentOptimal = route
+        FOR perm IN perms DO
+            FOR rearranged IN genRearranged(route, perm) DO
+                IF calcWeight(mat, rearranged) < calcWeight(mat, currentOptimal) THEN
+                    currentOptimal = rearranged
+                    optimal = FALSE
+                ENDIF
+            ENDFOR
+        ENDFOR
+        route = currentOptimal
+    ENDWHILE
+ENDFUNCTION

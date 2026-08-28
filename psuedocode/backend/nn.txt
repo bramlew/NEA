@@ -1,0 +1,19 @@
+FUNCTION nearestNeighbour(mat, startNode)
+    VAR cols = MATH.SQRT(mat.length)
+    VAR route = [startNode]
+    VAR currentNode = startNode
+    FOR i IN RANGE cols - 1 DO
+        VAR bestRoute = MATH.INFINITY
+        VAR bestIndex = -1
+        FOR j IN RANGE cols DO
+            VAR index = lookupIndex(currentNode, j, cols)
+            IF mat[index] < bestRoute AND NOT j IN route THEN
+                bestRoute = mat[index]
+                bestIndex = j
+            ENDIF
+        ENDFOR
+        route[i + 1] = bestIndex
+        currentNode = bestIndex
+    ENDFOR
+    RETURN route
+ENDFUNCTION
