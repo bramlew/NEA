@@ -7,7 +7,7 @@ import (
 	"github.com/bramlew/NEA/backend/internal/models"
 )
 
-func nearestNeighbour(mat *models.Matrix, startNode int) []int {
+func NearestNeighbour(mat *models.Matrix, startNode int) []int {
 	// Nearest neighbour greedy algorithm for route optimisation
 	route := make([]int, mat.Cols)
 	route[0] = startNode
