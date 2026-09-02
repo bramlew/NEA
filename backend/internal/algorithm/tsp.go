@@ -38,41 +38,6 @@ func threeOpt(mat *models.Matrix, baseline []int) []int {
 		for i := 0; i < len(baseline)-3; i++ {
 			for j := i + 1; j < len(baseline)-2; j++ {
 				for k := j + 1; k < len(baseline)-1; k++ {
-					/*
-						Segments are:
-						A: 0   ->  i
-						B: i+1 ->  j
-						C: j+1 ->  k
-						D: k+1 -> -1
-
-						By default, the route is in order A -> B -> C -> D
-						It can be reordered in 7 other ways (i.e. 8 total):
-						i:   A -> B' -> C  -> D
-						ii:  A -> B  -> C' -> D
-						iii: A -> B' -> C' -> D
-						iv:  A -> C  -> B  -> D
-						v:   A -> C' -> B  -> D
-						vi:  A -> C  -> B' -> D
-						vii: A -> C' -> B' -> D
-
-						Note that ' means that a segment has been reversed
-
-						Take, for example, order v. Decoded, this looks like:
-						0 -> i --> k -> j+1 --> i+1 -> j --> k+1 -> -1
-
-						In order to implement this in code in the context of 3-opt, we must figure out which of the 7
-						rearranged orders has the lowest weight. Whilst we could construct a new route for each
-						rearrangement of edges and calculate its overall weight linearly, this would be inefficient as
-						the only weight that is actually changing is the weight of the 3 edges. By doing a simple
-						comparison between the old weight of the 3 edges and the new weight, we can determine which
-						route's overall weight will be the smallest. We can also, for the outer loops, instead of
-						comparing the best of the 7 route's overall weight, we can just use the difference between the
-						original 3 edge weight and new 3 edge weight to find the greatest overall reduction in weight,
-						since the weight of the edges that aren't chosen is constant, so we just want the largest delta
-						between the 3 modified edges.
-
-					*/
-
 					segments := [4][2]int{
 						{0, i},
 						{i + 1, j},
@@ -126,3 +91,38 @@ func calcWeight(mat *models.Matrix, route []int) float64 {
 	}
 	return weight
 }
+
+/*
+	Segments are:
+	A: 0   ->  i
+	B: i+1 ->  j
+	C: j+1 ->  k
+	D: k+1 -> -1
+
+	By default, the route is in order A -> B -> C -> D
+	It can be reordered in 7 other ways (i.e. 8 total):
+	i:   A -> B' -> C  -> D
+	ii:  A -> B  -> C' -> D
+	iii: A -> B' -> C' -> D
+	iv:  A -> C  -> B  -> D
+	v:   A -> C' -> B  -> D
+	vi:  A -> C  -> B' -> D
+	vii: A -> C' -> B' -> D
+
+	Note that ' means that a segment has been reversed
+
+	Take, for example, order v. Decoded, this looks like:
+	0 -> i --> k -> j+1 --> i+1 -> j --> k+1 -> -1
+
+	In order to implement this in code in the context of 3-opt, we must figure out which of the 7
+	rearranged orders has the lowest weight. Whilst we could construct a new route for each
+	rearrangement of edges and calculate its overall weight linearly, this would be inefficient as
+	the only weight that is actually changing is the weight of the 3 edges. By doing a simple
+	comparison between the old weight of the 3 edges and the new weight, we can determine which
+	route's overall weight will be the smallest. We can also, for the outer loops, instead of
+	comparing the best of the 7 route's overall weight, we can just use the difference between the
+	original 3 edge weight and new 3 edge weight to find the greatest overall reduction in weight,
+	since the weight of the edges that aren't chosen is constant, so we just want the largest delta
+	between the 3 modified edges.
+
+*/
