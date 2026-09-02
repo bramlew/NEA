@@ -32,24 +32,28 @@ func nearestNeighbour(mat *models.Matrix, startNode int) []int {
 }
 
 func threeOpt(mat *models.Matrix, baseline []int) []int {
+	// Perform 3-opt optimisation logic
 	route := baseline
 	for {
+		// Until an explicit break of the loop (i.e. it cannot be optimised any more), keep trying to optimise it
 		optimal, optimalDelta := route, 0.0
 		for i := 0; i < len(baseline)-3; i++ {
 			for j := i + 1; j < len(baseline)-2; j++ {
 				for k := j + 1; k < len(baseline)-1; k++ {
+					// The for loops above initialise iterators that can be used to generate every possible triplet of edges
+
+					// The below constants are arrays of the indexes of where the end of split segments of the route are
 					segments := [4][2]int{
 						{0, i},
 						{i + 1, j},
 						{j + 1, k},
 						{k + 1, len(baseline) - 1},
 					}
-
+					// Note that the below 2 constants only contain the indexes for the inner two segments, as the outer two are constant and can be found in the previously declared constant
 					reversedSegments := [2][2]int{
 						{j, i + 1},
 						{k, j + 1},
 					}
-
 					orders := [7][2][2]int{
 						{reversedSegments[0], segments[2]},
 						{segments[1], reversedSegments[1]},
@@ -60,11 +64,14 @@ func threeOpt(mat *models.Matrix, baseline []int) []int {
 						{reversedSegments[1], reversedSegments[0]},
 					}
 
+					// Determine the old/current weight of the 3 edges that are going to be reordered
 					oldWeight := mat.Matrix[LookupIndex(segments[0][1], segments[1][0], mat.Cols)].Distance + mat.Matrix[LookupIndex(segments[1][1], segments[2][0], mat.Cols)].Distance + mat.Matrix[LookupIndex(segments[2][1], segments[3][0], mat.Cols)].Distance
 					for _, order := range orders {
+						// For every possible way the edges can be reordered, determine the weight of those three edges and find the delta
 						newWeight := mat.Matrix[LookupIndex(segments[0][1], order[0][0], mat.Cols)].Distance + mat.Matrix[LookupIndex(order[0][1], order[1][0], mat.Cols)].Distance + mat.Matrix[LookupIndex(order[1][1], segments[3][0], mat.Cols)].Distance
 						delta := newWeight - oldWeight
 						if delta < optimalDelta {
+							// If the delta is better than the current best delta in the whole loop, update it
 							optimal = slices.Concat(route[:i+1], route[order[0][0]:order[0][1]], route[order[1][0]:order[1][1]], route[k+1:])
 							optimalDelta = delta
 						}
@@ -72,16 +79,13 @@ func threeOpt(mat *models.Matrix, baseline []int) []int {
 				}
 			}
 		}
-
 		if optimalDelta == 0 {
+			// If there was no improvement in the delta, break the loop
 			break
 		}
 		route = optimal
-
 	}
-
 	return route
-
 }
 
 func calcWeight(mat *models.Matrix, route []int) float64 {
