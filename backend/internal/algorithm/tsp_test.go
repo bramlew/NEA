@@ -20,7 +20,7 @@ func TestNearestNeighbourInit(t *testing.T) {
 	for i := range locations {
 		result := NearestNeighbour(mat, i)
 		if result == nil {
-			t.Errorf("error running nearest neighbour algorithm")
+			t.Error("error running nearest neighbour algorithm")
 		} else {
 			t.Logf("nearest neighbour algorithm produced order: %v", result)
 		}
