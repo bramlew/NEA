@@ -9,8 +9,8 @@ import (
 
 func NearestNeighbour(mat *models.Matrix, startNode int) []int {
 	// Nearest neighbour greedy algorithm for route optimisation
-	route := make([]int, mat.Cols)
-	route[0] = startNode
+	route := make([]int, 0, mat.Cols)
+	route = append(route, startNode)
 	currentNode := startNode
 	for i := 0; i < mat.Cols-1; i++ {
 		// For every index in the list of locations apart from the start node, attempt to find the closest node
@@ -25,7 +25,7 @@ func NearestNeighbour(mat *models.Matrix, startNode int) []int {
 			}
 		}
 		// Add the nearest neighbour to the route and set the current node to this node
-		route[i+1] = bestIndex
+		route = append(route, bestIndex)
 		currentNode = bestIndex
 	}
 	return route
