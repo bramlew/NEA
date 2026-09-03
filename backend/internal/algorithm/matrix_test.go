@@ -3,17 +3,12 @@ package algorithm
 import (
 	"math"
 	"testing"
-
-	"github.com/bramlew/NEA/backend/internal/models"
 )
 
 func TestMatrixValidity(t *testing.T) {
 	// Test that the constructed matrix has correct values
 	const N int = 10 // No. of random locations to generate
-	locations := make([]models.Coords, N)
-	for i := 0; i < N; i++ {
-		locations[i] = RandValidCoords()
-	}
+	locations := RandLocations(N)
 
 	mat, err := ConstructMatrix(locations)
 	if err != nil {

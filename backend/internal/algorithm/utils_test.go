@@ -29,3 +29,11 @@ func randSign() float64 {
 	}
 	return -1
 }
+
+func RandLocations(n int) []models.Coords {
+	locations := make([]models.Coords, n)
+	for i := range locations {
+		locations[i] = RandValidCoords()
+	}
+	return locations
+}
