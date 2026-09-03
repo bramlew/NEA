@@ -37,7 +37,7 @@ func TestNearestNeighbourAccuracy(t *testing.T) {
 		// Test for every possible starting location
 		result := NearestNeighbour(mat, i)
 		if result != nil {
-			// Code here is effectively same as in the algorithm code, but with checks against the previously calculated order
+			// Code here is effectively identical to the algorithm code, but with checks against the previously calculated order
 			visitedIndexes := make([]int, 0, N)
 			visitedIndexes = append(visitedIndexes, i)
 			currentNode := i
