@@ -100,9 +100,9 @@ func getCorrectSlice(slice []int, start int, end int) []int {
 	if start > end {
 		reversed := slices.Clone(slice)
 		slices.Reverse(reversed)
-		return reversed[end:start]
+		return reversed[end : start+1]
 	}
-	return slice[start:end]
+	return slice[start : end+1]
 }
 
 /*
