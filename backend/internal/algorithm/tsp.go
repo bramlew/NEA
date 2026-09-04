@@ -72,7 +72,7 @@ func ThreeOpt(mat *models.Matrix, baseline []int) []int {
 						delta := newWeight - oldWeight
 						if delta < optimalDelta {
 							// If the delta is better than the current best delta in the whole loop, update it
-							optimal = slices.Concat(route[:i+1], route[order[0][0]:order[0][1]], route[order[1][0]:order[1][1]], route[k+1:])
+							optimal = slices.Concat(route[:i+1], getCorrectSlice(route, order[0][0], order[0][1]), getCorrectSlice(route, order[1][0], order[1][1]), route[k+1:])
 							optimalDelta = delta
 						}
 					}
@@ -94,6 +94,15 @@ func calcWeight(mat *models.Matrix, route []int) float64 {
 		weight += mat.Matrix[LookupIndex(route[i], route[i+1], mat.Cols)].Distance
 	}
 	return weight
+}
+
+func getCorrectSlice(slice []int, start int, end int) []int {
+	if start > end {
+		reversed := slices.Clone(slice)
+		slices.Reverse(reversed)
+		return reversed[end:start]
+	}
+	return slice[start:end]
 }
 
 /*
