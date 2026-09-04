@@ -31,7 +31,7 @@ func NearestNeighbour(mat *models.Matrix, startNode int) []int {
 	return route
 }
 
-func threeOpt(mat *models.Matrix, baseline []int) []int {
+func ThreeOpt(mat *models.Matrix, baseline []int) []int {
 	// Perform 3-opt optimisation logic
 	route := baseline
 	for {

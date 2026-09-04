@@ -61,3 +61,27 @@ func TestNearestNeighbourAccuracy(t *testing.T) {
 		}
 	}
 }
+
+func TestThreeOptInit(t *testing.T) {
+	// Test that the3 3-opt algorithm produces a reasonable result without errors
+	const N = 10 // No. of locations to randomly choose
+	locations := RandLocations(N)
+	mat, err := ConstructMatrix(locations)
+	if err != nil {
+		t.Errorf("error constructing matrix: %v", err)
+	}
+	for i := range locations {
+		order := NearestNeighbour(mat, i)
+		if order == nil {
+			t.Error("error running nearest neighbour algorithm")
+		} else {
+			t.Logf("nearest neighbour algorithm produced order: %v", order)
+			final := ThreeOpt(mat, order)
+			if final == nil {
+				t.Error("error running 3-opt algorithm")
+			} else {
+				t.Logf("3-opt algorithm produced order: %v", final)
+			}
+		}
+	}
+}
