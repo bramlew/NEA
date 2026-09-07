@@ -33,13 +33,14 @@ func NearestNeighbour(mat *models.Matrix, startNode int) []int {
 
 func ThreeOpt(mat *models.Matrix, baseline []int) []int {
 	// Perform 3-opt optimisation logic
+	length := len(baseline)
 	route := baseline
 	for {
 		// Until an explicit break of the loop (i.e. it cannot be optimised any more), keep trying to optimise it
 		optimal, optimalDelta := route, 0.0
-		for i := 0; i < len(baseline)-3; i++ {
-			for j := i + 1; j < len(baseline)-2; j++ {
-				for k := j + 1; k < len(baseline)-1; k++ {
+		for i := 0; i < length-3; i++ {
+			for j := i + 1; j < length-2; j++ {
+				for k := j + 1; k < length-1; k++ {
 					// The for loops above initialise iterators that can be used to generate every possible triplet of edges
 
 					// The below constants are arrays of the indexes of where the end of split segments of the route are
@@ -47,7 +48,7 @@ func ThreeOpt(mat *models.Matrix, baseline []int) []int {
 						{0, i},
 						{i + 1, j},
 						{j + 1, k},
-						{k + 1, len(baseline) - 1},
+						{k + 1, length - 1},
 					}
 					// Note that the below 2 constants only contain the indexes for the inner two segments, as the outer two are constant and can be found in the previously declared constant
 					reversedSegments := [2][2]int{
@@ -93,6 +94,7 @@ func ThreeOpt(mat *models.Matrix, baseline []int) []int {
 }
 
 func calcWeight(mat *models.Matrix, route []int) float64 {
+	// Calculate the overall weight of a given route with a given matrix
 	weight := 0.0
 	for i := range route {
 		weight += mat.Matrix[LookupIndex(route[i], route[i+1], mat.Cols)].Distance
@@ -101,6 +103,7 @@ func calcWeight(mat *models.Matrix, route []int) float64 {
 }
 
 func getCorrectSlice(slice []int, start int, end int) []int {
+	// Get the correct slice of the slice provided, from a given start and end, hence works with start >= end
 	if start > end {
 		reversed := slices.Clone(slice[end : start+1])
 		slices.Reverse(reversed)
