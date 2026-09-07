@@ -102,9 +102,9 @@ func calcWeight(mat *models.Matrix, route []int) float64 {
 
 func getCorrectSlice(slice []int, start int, end int) []int {
 	if start > end {
-		reversed := slices.Clone(slice)
+		reversed := slices.Clone(slice[end : start+1])
 		slices.Reverse(reversed)
-		return reversed[end : start+1]
+		return reversed
 	}
 	return slice[start : end+1]
 }
