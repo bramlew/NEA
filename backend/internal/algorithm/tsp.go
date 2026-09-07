@@ -65,10 +65,14 @@ func ThreeOpt(mat *models.Matrix, baseline []int) []int {
 					}
 
 					// Determine the old/current weight of the 3 edges that are going to be reordered
-					oldWeight := mat.Matrix[LookupIndex(segments[0][1], segments[1][0], mat.Cols)].Distance + mat.Matrix[LookupIndex(segments[1][1], segments[2][0], mat.Cols)].Distance + mat.Matrix[LookupIndex(segments[2][1], segments[3][0], mat.Cols)].Distance
+					oldWeight := mat.Matrix[LookupIndex(route[segments[0][1]], route[segments[1][0]], mat.Cols)].Distance +
+						mat.Matrix[LookupIndex(route[segments[1][1]], route[segments[2][0]], mat.Cols)].Distance +
+						mat.Matrix[LookupIndex(route[segments[2][1]], route[segments[3][0]], mat.Cols)].Distance
 					for _, order := range orders {
 						// For every possible way the edges can be reordered, determine the weight of those three edges and find the delta
-						newWeight := mat.Matrix[LookupIndex(segments[0][1], order[0][0], mat.Cols)].Distance + mat.Matrix[LookupIndex(order[0][1], order[1][0], mat.Cols)].Distance + mat.Matrix[LookupIndex(order[1][1], segments[3][0], mat.Cols)].Distance
+						newWeight := mat.Matrix[LookupIndex(route[segments[0][1]], route[order[0][0]], mat.Cols)].Distance +
+							mat.Matrix[LookupIndex(route[order[0][1]], route[order[1][0]], mat.Cols)].Distance +
+							mat.Matrix[LookupIndex(route[order[1][1]], route[segments[3][0]], mat.Cols)].Distance
 						delta := newWeight - oldWeight
 						if delta < optimalDelta {
 							// If the delta is better than the current best delta in the whole loop, update it
