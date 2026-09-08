@@ -132,7 +132,7 @@ func ThreeOpt(mat *models.Matrix, baseline []int) []int {
 func calcWeight(mat *models.Matrix, route []int) float64 {
 	// Calculate the overall weight of a given route with a given matrix
 	weight := 0.0
-	for i := range route {
+	for i := 0; i < len(route)-1; i++ {
 		weight += mat.Matrix[LookupIndex(route[i], route[i+1], mat.Cols)].Distance
 	}
 	return weight
