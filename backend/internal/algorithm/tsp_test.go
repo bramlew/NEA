@@ -110,6 +110,6 @@ func TestConcurrency(t *testing.T) {
 	if err != nil {
 		t.Errorf("error running tsp algorithms: %v", err)
 	} else {
-		t.Logf("algorithm produced optimal route with weight: %.2f", tour.TotalWeight)
+		t.Logf("concurrency algorithm produced optimal route with weight: %.2f", tour.TotalWeight)
 	}
 }
