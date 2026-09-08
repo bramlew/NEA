@@ -15,7 +15,7 @@ func ConstructMatrix(locations []models.Coords) (*models.Matrix, error) {
 	length := len(locations)
 	// Store the matrix as a flat array instead of a 2D array, as this speeds up indexing time, you just need to store the
 	// no. of columns along with the actual matrix.
-	mat := make([]*models.Route, length*length)
+	mat := make([]*models.Leg, length*length)
 	for i, origin := range locations {
 		for j, dest := range locations {
 			// For every possible origin and destination coordinate pair, calculate the great-circle distance between them.
@@ -26,9 +26,9 @@ func ConstructMatrix(locations []models.Coords) (*models.Matrix, error) {
 				if err != nil {
 					return nil, err
 				}
-				mat[index] = &models.Route{Distance: dist}
+				mat[index] = &models.Leg{Distance: dist}
 			} else {
-				mat[index] = &models.Route{Distance: inf}
+				mat[index] = &models.Leg{Distance: inf}
 			}
 		}
 	}

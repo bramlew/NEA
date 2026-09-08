@@ -1,5 +1,5 @@
 package models
 
-type Route struct {
+type Leg struct {
 	Distance float64 `json:"distance"`
 }

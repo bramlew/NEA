@@ -1,11 +1,47 @@
 package algorithm
 
 import (
+	"errors"
 	"math"
 	"slices"
 
 	"github.com/bramlew/NEA/backend/internal/models"
 )
+
+func MultiTSP(mat *models.Matrix) (*models.Tour, error) {
+	// Solve a TSP fully in an asynchronous manner using a given adjacency matrix
+	best := &models.Tour{
+		TotalWeight: math.Inf(1),
+		Order:       nil,
+	}
+	result := make(chan *models.Tour, mat.Cols)
+	for i := 0; i < mat.Cols; i++ {
+		// Start up the goroutines for each starting node
+		go solveTSP(mat, i, result)
+	}
+	for i := 0; i < mat.Cols; i++ {
+		// Await each result, and if it has a lower weight than the current best, set the best to that tour
+		tour := <-result
+		if tour.TotalWeight < best.TotalWeight {
+			best = tour
+		}
+	}
+	if best.Order == nil {
+		return nil, errors.New("no best tour found")
+	}
+	return best, nil
+}
+
+func solveTSP(mat *models.Matrix, startNode int, result chan *models.Tour) {
+	// Solve a single TSP synchronously
+	baseline := NearestNeighbour(mat, startNode)
+	optimised := ThreeOpt(mat, baseline)
+	weight := calcWeight(mat, optimised)
+	result <- &models.Tour{
+		TotalWeight: weight,
+		Order:       optimised,
+	}
+}
 
 func NearestNeighbour(mat *models.Matrix, startNode int) []int {
 	// Nearest neighbour greedy algorithm for route optimisation
