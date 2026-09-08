@@ -36,6 +36,27 @@ func optimise(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
 		return
 	}
-	algorithm.ParseJsonResponse(mat)
-	c.JSON(http.StatusOK, gin.H{"matrix": mat})
+	// algorithm.ParseJsonResponse(mat)
+	tour, err := algorithm.MultiTSP(mat)
+	if err != nil {
+		// Return an error if the TSP algorithm fails
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+	// Make a locations list in optimised order
+	length := len(locations)
+	order := make([]models.Coords, length)
+	for i, locationIndex := range tour.Order {
+		order[i] = locations[locationIndex]
+	}
+	// Make a weight list of individual legs
+	weights := make([]float64, length)
+	for i := 0; i < length-1; i++ {
+		weights[i] = mat.Matrix[algorithm.LookupIndex(tour.Order[i], tour.Order[i+1], mat.Cols)].Distance
+	}
+	response := models.Response{
+		Locations:   order,
+		Weights:     weights,
+		TotalWeight: tour.TotalWeight,
+	}
+	c.JSON(http.StatusOK, gin.H{"route": response})
 }
