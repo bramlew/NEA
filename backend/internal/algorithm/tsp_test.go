@@ -63,7 +63,7 @@ func TestNearestNeighbourAccuracy(t *testing.T) {
 }
 
 func TestThreeOptInit(t *testing.T) {
-	// Test that the3 3-opt algorithm produces a reasonable result without errors
+	// Test that the 3-opt algorithm produces a reasonable result without errors
 	const N = 10 // No. of locations to randomly choose
 	locations := RandLocations(N)
 	mat, err := ConstructMatrix(locations)
@@ -87,5 +87,29 @@ func TestThreeOptInit(t *testing.T) {
 }
 
 func TestConcurrency(t *testing.T) {
-
+	// Test that the algorithm successfully runs concurrently with reasonable results
+	const N = 10 // No. of locations to randomly choose
+	locations := RandLocations(N)
+	mat, err := ConstructMatrix(locations)
+	if err != nil {
+		t.Errorf("error constructing matrix: %v", err)
+	}
+	for i := range locations {
+		baseline := NearestNeighbour(mat, i)
+		baselineWeight := calcWeight(mat, baseline)
+		improved := ThreeOpt(mat, baseline)
+		improvedWeight := calcWeight(mat, improved)
+		if baselineWeight < improvedWeight {
+			t.Errorf("baseline weight smaller than improved weight, %.2f < %.2f", baselineWeight, improvedWeight)
+		} else {
+			t.Logf("baseline weight: %.2f, improved weight: %.2f", baselineWeight, improvedWeight)
+		}
+	}
+	// Now test the concurrency algorithm
+	tour, err := MultiTSP(mat)
+	if err != nil {
+		t.Errorf("error running tsp algorithms: %v", err)
+	} else {
+		t.Logf("algorithm produced optimal route with weight: %.2f", tour.TotalWeight)
+	}
 }
