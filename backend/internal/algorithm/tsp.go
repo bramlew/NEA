@@ -50,13 +50,13 @@ func NearestNeighbour(mat *models.Matrix, startNode int) []int {
 	currentNode := startNode
 	for i := 0; i < mat.Cols-1; i++ {
 		// For every index in the list of locations apart from the start node, attempt to find the closest node
-		bestRoute, bestIndex := math.Inf(1), -1
+		bestDist, bestIndex := math.Inf(1), -1
 		for j := 0; j < mat.Cols; j++ {
 			// Check the distance between the current node and every single other node, hence finding the nearest node
 			index := LookupIndex(currentNode, j, mat.Cols)
 			dist := mat.Matrix[index].Distance
-			if dist < bestRoute && !slices.Contains(route, j) {
-				bestRoute = dist
+			if dist < bestDist && !slices.Contains(route, j) {
+				bestDist = dist
 				bestIndex = j
 			}
 		}
