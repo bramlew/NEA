@@ -1,0 +1,5 @@
+FUNCTION calcMultimodalDistances(locations)
+    CONSTANT MaxRoadDist = 3000 // Maximum distance for a road-only leg
+    VAR
+
+ENDFUNCTION
