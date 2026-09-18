@@ -30,7 +30,7 @@ func optimise(c *gin.Context) {
 	}
 	// If the request does have valid syntax, construct a matrix of distances between the coordinates sent
 	locations := req.Locations
-	mat, err := algorithm.ConstructMatrix(locations)
+	mat, err := algorithm.ConstructMultimodalMatrix(locations)
 	if err != nil {
 		// Return an error if the matrix construction fails
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
@@ -41,6 +41,7 @@ func optimise(c *gin.Context) {
 	if err != nil {
 		// Return an error if the TSP algorithm fails
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 	// Make a locations list in optimised order
 	length := len(locations)
