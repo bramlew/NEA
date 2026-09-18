@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"slices"
+	"time"
 
 	"github.com/goccy/go-json"
 
@@ -20,11 +21,11 @@ const EndpointDirections = "https://api.heigit.org/openrouteservice/v2/direction
 
 func ORSRequest(payload []byte, endpoint string) (*http.Response, error) {
 	// Make an API request to the given ORS endpoint
-	if err := godotenv.Load(); err != nil {
+	if err := godotenv.Load("..\\..\\.env"); err != nil {
 		return nil, errors.New("error loading .env file")
 	}
 	apiKey := os.Getenv("ORS_API_KEY")
-	client := &http.Client{Timeout: 5000}
+	client := &http.Client{Timeout: 5 * time.Second}
 
 	// Create the request and handle errors
 	req, err := http.NewRequest("POST", endpoint, bytes.NewBuffer(payload))
