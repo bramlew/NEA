@@ -37,3 +37,15 @@ func RandLocations(n int) []models.Coords {
 	}
 	return locations
 }
+
+func RandEuropeanLocations(n int) []models.Coords {
+	// Generate random locatiosn found in continental Europe, i.e. from longitude 5-23, latitude 46-52
+	locations := make([]models.Coords, n)
+	for i := range locations {
+		locations[i] = models.Coords{
+			Lon: rand.Float64()*18 + 5,
+			Lat: rand.Float64()*6 + 46,
+		}
+	}
+	return locations
+}

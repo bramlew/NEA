@@ -1,5 +1,55 @@
 FUNCTION calcMultimodalDistances(locations)
     CONSTANT MaxRoadDist = 3000 // Maximum distance for a road-only leg
-    VAR
-
+    VAR mat = ConstructMatrix(locations)
+    VAR origins = []
+    VAR dests = []
+    FOR pair IN RANGE calcLocationPairs(mat) DO
+        IF pair.length < MaxRoadDist THEN
+            // Road route
+            origins.append(pair.origin)
+            dests.append(pair.dest)
+            getMatLeg(mat, pair).isRoad = TRUE
+        ENDIF
+        // Do nothing for air route, as distance is already correct and default value for boolean field is already FALSE
+        IF origins.length > 59 THEN
+            // If the overall length of the request is about to exceed the maximum on the next addition, execute the
+            // request
+            newDists = MatrixRequest(origins, dests)
+            updateDists(newDists, mat)
+            origins = []
+            dests = []
+        ENDIF
+    ENDFOR
+    IF origins.length > 0 THEN
+    // If there are still locations left to be calculated, do that now
+        newDists = MatrixRequest(origins, dests)
+        updateDists(newDists, mat)
+    ENDIF
+    RETURN mat
 ENDFUNCTION
+
+
+Basis of multimodal function:
+ - Create an adjacency matrix of great-circle distances between all locations
+ - For every possible distance (ignore reverse distances), decide whether to go by air or road
+ - If by road, then:
+   + Add the two locations being used as a pair in the ORS matrix request
+   + Once request has been executed, modify the weight to be the road weight
+ - If by air then:
+   + Consider the nearest (5?) airports to the locations, and calculate their distances (2-var binary search?)
+   + Add the airports/locations connecting to the ORS matrix request
+   + Once the request has been executed, consider the sum of all the distances involved - i.e. great-circle distance
+     between airports, and road distances between airports and locations - to calculate the best overall airports to use
+ - Once best distance is calculated, change the matrix entry to reflect the newly calculated distance and any metadata
+   such as type of route and airports involved
+ - Consider a matrix which will contain the pairs of locations, if the size exceeds 3,500, remove the most recent
+   locations and send the ORS matrix request
+ - Potentially modify the models.Leg type to include the starting and ending location as coordinates
+ - Major airports will be stored in an array/slice in memory (data obtained through JSON/GitHub?)
+
+Modifications:
+ - Air routes do not calculate distances from airport to location, just great-circle distance from location to location
+ - This makes the algorithm much simpler, execute much faster, and reduce quota usage due to less ORS matrix API
+   requests being sent
+ - Hence, the only time the precalculated weight is modified is if it is a road route, hence less metadata is needed to
+   be added to models.Leg, though type will still be added for when returning data to the user

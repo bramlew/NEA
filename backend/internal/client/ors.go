@@ -2,7 +2,6 @@ package client
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -10,7 +9,8 @@ import (
 	"os"
 	"slices"
 
-	"github.com/bramlew/NEA/backend/internal/algorithm"
+	"github.com/goccy/go-json"
+
 	"github.com/bramlew/NEA/backend/internal/models"
 	"github.com/joho/godotenv"
 )
@@ -107,7 +107,7 @@ func MatrixRequest(origins []models.Coords, dests []models.Coords) (*models.Matr
 	// Make the 2D slice into a 1D flat slice for faster indexing later
 	for i, row := range resStruct.Distances {
 		for j, dist := range row {
-			mat.Matrix[algorithm.LookupIndex(i, j, cols)] = &models.Leg{Distance: dist}
+			mat.Matrix[lookupIndex(i, j, cols)] = &models.Leg{Distance: dist}
 		}
 	}
 	return mat, nil
@@ -126,8 +126,14 @@ func genRangeSlice(start int, end int) []int {
 	// Generate an int slice of a given range, with end being exclusive
 	length := end - start
 	ints := make([]int, length)
-	for i := 0; i < length; i++ {
+	for i := range length {
 		ints[i] = start + i
 	}
 	return ints
+}
+
+func lookupIndex(i int, j int, cols int) int {
+	// Returns the flat index from a given 2D index (client package version, as you can't have two packages import each
+	// other)
+	return i*cols + j
 }
