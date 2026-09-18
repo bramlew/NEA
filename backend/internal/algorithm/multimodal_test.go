@@ -19,5 +19,4 @@ func TestMultimodal(t *testing.T) {
 			t.Errorf("multimodal road distance same as standard distance: %.2f", multimodalLeg.Distance)
 		}
 	}
-	t.Logf("multimodal matrix: %v", *multimodal)
 }
