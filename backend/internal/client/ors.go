@@ -21,7 +21,7 @@ const EndpointDirections = "https://api.heigit.org/openrouteservice/v2/direction
 
 func ORSRequest(payload []byte, endpoint string) (*http.Response, error) {
 	// Make an API request to the given ORS endpoint
-	if err := godotenv.Load("..\\..\\.env"); err != nil {
+	if err := godotenv.Load(); err != nil {
 		return nil, errors.New("error loading .env file")
 	}
 	apiKey := os.Getenv("ORS_API_KEY")
@@ -42,6 +42,10 @@ func ORSRequest(payload []byte, endpoint string) (*http.Response, error) {
 	res, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error sending request: %v", err)
+	}
+	statusCode := res.StatusCode
+	if statusCode != http.StatusOK {
+		return nil, fmt.Errorf("non-200 status code: %d", statusCode)
 	}
 
 	return res, nil
