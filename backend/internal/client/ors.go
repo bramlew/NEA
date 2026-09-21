@@ -45,6 +45,7 @@ func ORSRequest(payload []byte, endpoint string) (*http.Response, error) {
 	}
 	statusCode := res.StatusCode
 	if statusCode != http.StatusOK {
+		res.Body.Close()
 		return nil, fmt.Errorf("non-200 status code: %d", statusCode)
 	}
 
