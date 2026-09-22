@@ -10,9 +10,8 @@ import (
 	"slices"
 	"time"
 
-	"github.com/goccy/go-json"
-
 	"github.com/bramlew/NEA/backend/internal/models"
+	"github.com/goccy/go-json"
 	"github.com/joho/godotenv"
 )
 
