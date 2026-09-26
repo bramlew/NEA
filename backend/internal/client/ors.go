@@ -118,6 +118,10 @@ func MatrixRequest(origins []models.Coords, dests []models.Coords) (*models.Matr
 	return mat, nil
 }
 
+func PolylineRequest(origin models.Coords, dest models.Coords) {
+
+}
+
 func parseCoordsList(coords []models.Coords) [][]float64 {
 	// Parse a coords list to be passed into JSON
 	parsed := make([][]float64, len(coords))

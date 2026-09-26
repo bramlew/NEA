@@ -1,0 +1,9 @@
+FUNCTION RamerDouglasPeucker(locations, epsilon)
+    VAR d_max = calcDMax(locations)
+    IF d_max.distance < epsilon THEN
+        RETURN [locations[0], locations[-1]]
+    ENDIF
+    VAR before = RamerDouglasPeucker(locations[:d_max.index])
+    VAR after = RamerDouglasPeucker(locations[d_max.index:])
+    RETURN before + after
+ENDFUNCTION

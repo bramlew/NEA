@@ -49,6 +49,10 @@ func ConstructMultimodalMatrix(locations []models.Coords) (*models.Matrix, error
 	return mat, nil
 }
 
+func GetPolylines(order []int, locations []models.Coords) {
+
+}
+
 func updateDists(mat *models.Matrix, locations []models.Coords, origins []int, dests []int) {
 	// Update the distances to be road distances in a matrix by using an ORS request
 	originsLength := len(origins)
@@ -57,18 +61,24 @@ func updateDists(mat *models.Matrix, locations []models.Coords, origins []int, d
 		log.Printf("origins array is not same length as dests array, lengths %d and %d respectively", originsLength, destsLength)
 		return
 	}
+
+	// Make arrays for the origins and destinations as coordinates
 	requestOrigins := make([]models.Coords, originsLength)
 	requestDests := make([]models.Coords, destsLength)
 	for i := range origins {
 		requestOrigins[i] = locations[origins[i]]
 		requestDests[i] = locations[dests[i]]
 	}
+
+	// Construct a great-circle distance adjacency matrix
 	newDists, err := client.MatrixRequest(requestOrigins, requestDests)
 	if err != nil {
 		log.Printf("error calculating road distances: %v", err)
 		return
 	}
 	for i := range origins {
+		// For every pair of locations, correct the current great-circle (i.e. air) distance to the road distance if a
+		// road distance was calculated
 		newDist := newDists.Matrix[LookupIndex(i, i, newDists.Cols)].Distance
 		if newDist != 0 {
 			leg := mat.Matrix[LookupIndex(origins[i], dests[i], mat.Cols)]
