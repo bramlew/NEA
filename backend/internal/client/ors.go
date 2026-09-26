@@ -18,13 +18,14 @@ import (
 const EndpointMatrix = "https://api.heigit.org/openrouteservice/v2/matrix/driving-hgv"
 const EndpointDirections = "https://api.heigit.org/openrouteservice/v2/directions/driving-hgv"
 
+var client = &http.Client{Timeout: 5 * time.Second}
+
 func ORSRequest(payload []byte, endpoint string) (*http.Response, error) {
 	// Make an API request to the given ORS endpoint
 	if err := godotenv.Load(); err != nil {
 		return nil, errors.New("error loading .env file")
 	}
 	apiKey := os.Getenv("ORS_API_KEY")
-	client := &http.Client{Timeout: 5 * time.Second}
 
 	// Create the request and handle errors
 	req, err := http.NewRequest("POST", endpoint, bytes.NewBuffer(payload))

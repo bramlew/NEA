@@ -2,6 +2,7 @@ package algorithm
 
 import (
 	"log"
+	"slices"
 	"sync"
 
 	"github.com/bramlew/NEA/backend/internal/client"
@@ -31,8 +32,9 @@ func ConstructMultimodalMatrix(locations []models.Coords) (*models.Matrix, error
 			// Do nothing for air route, as it is already in the correct form
 			if len(origins) >= 59 {
 				// Execute the request (reached max capacity)
+				reqOrigins, reqDests := slices.Clone(origins), slices.Clone(dests)
 				wg.Go(func() {
-					updateDists(mat, locations, origins, dests)
+					updateDists(mat, locations, reqOrigins, reqDests)
 				})
 				origins = make([]int, 0, 59)
 				dests = make([]int, 0, 59)

@@ -3,7 +3,7 @@ FUNCTION RamerDouglasPeucker(locations, epsilon)
     IF d_max.distance < epsilon THEN
         RETURN [locations[0], locations[-1]]
     ENDIF
-    VAR before = RamerDouglasPeucker(locations[:d_max.index])
+    VAR before = RamerDouglasPeucker(locations[:d_max.index+1])
     VAR after = RamerDouglasPeucker(locations[d_max.index:])
-    RETURN before + after
+    RETURN before + after[1:]
 ENDFUNCTION

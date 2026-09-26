@@ -35,7 +35,7 @@ func RDP(locations []models.Coords, epsilon float64) ([]models.Coords, error) {
 	}
 	// If the max distance is not within the specified tolerance, recursively call the RDP algorithm for points either
 	// side of the max distance point's index
-	before, err := RDP(locations[:index], epsilon)
+	before, err := RDP(locations[:index+1], epsilon)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func RDP(locations []models.Coords, epsilon float64) ([]models.Coords, error) {
 	if err != nil {
 		return nil, err
 	}
-	full := slices.Concat(before, after)
+	full := slices.Concat(before, after[1:])
 	return full, nil
 }
 
@@ -52,6 +52,12 @@ func calcDMax(locations []models.Coords) (float64, int, error) {
 	// line from the start to the end of the provided locations array
 	dMax, index := 0.0, 0
 	start, end := 0, len(locations)-1
+	ALoc := locations[start]
+	BLoc := locations[end]
+	c, err := GreatCircleDistance(ALoc, BLoc)
+	if err != nil {
+		return 0.0, 0, fmt.Errorf("error calculating great circle distance between %v and %v: %v", ALoc, BLoc, err)
+	}
 	for i := start + 1; i < end; i++ {
 		// For every location excluding the start and end one, calculate the distance from itself to the line
 		// In these calculations, A is the start location, B is the end location, and C is the point from which we are
@@ -61,8 +67,6 @@ func calcDMax(locations []models.Coords) (float64, int, error) {
 		// A and B are the angles at their respective location on the spherical triangle (C not needed for this case)
 		// d is the side opposite A in a right spherical triangle between A, C, and the point at which the perpendicular
 		// between C and the line AB intersects AB
-		ALoc := locations[start]
-		BLoc := locations[end]
 		CLoc := locations[i]
 		a, err := GreatCircleDistance(BLoc, CLoc)
 		if err != nil {
@@ -71,10 +75,6 @@ func calcDMax(locations []models.Coords) (float64, int, error) {
 		b, err := GreatCircleDistance(ALoc, CLoc)
 		if err != nil {
 			return 0.0, 0, fmt.Errorf("error calculating great circle distance between %v and %v: %v", ALoc, CLoc, err)
-		}
-		c, err := GreatCircleDistance(ALoc, BLoc)
-		if err != nil {
-			return 0.0, 0, fmt.Errorf("error calculating great circle distance between %v and %v: %v", ALoc, BLoc, err)
 		}
 		d := 0.0
 		if A := SLCAngle(b, c, a); A >= math.Pi/2 {
