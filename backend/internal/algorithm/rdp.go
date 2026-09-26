@@ -94,9 +94,9 @@ func calcDMax(locations []models.Coords) (float64, int, error) {
 func EncodePolyline(coords []models.Coords) string {
 	// Encode a coordinates array into a polyline string
 	coords2D := make([][]float64, len(coords))
-	for i := range coords {
+	for i, coord := range coords {
 		// Convert the coordinates array from 1D coords struct to 2D float
-		coords2D[i][0], coords2D[i][1] = coords[i].Lat, coords[i].Lon
+		coords2D[i] = []float64{coord.Lat, coord.Lon}
 	}
 	return string(polyline.EncodeCoords(coords2D))
 }

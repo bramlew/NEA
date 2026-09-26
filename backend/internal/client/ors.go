@@ -118,8 +118,13 @@ func MatrixRequest(origins []models.Coords, dests []models.Coords) (*models.Matr
 	return mat, nil
 }
 
-func PolylineRequest(origin models.Coords, dest models.Coords) {
-
+func PolylineRequest(origin models.Coords, dest models.Coords) (string, error) {
+	payload := models.PolylinePayload{
+		Coordinates:      parseCoordsList([]models.Coords{origin, dest}),
+		GeometrySimplify: true,
+		Instructions:     false,
+		Units:            "km",
+	}
 }
 
 func parseCoordsList(coords []models.Coords) [][]float64 {
