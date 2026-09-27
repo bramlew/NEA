@@ -7,7 +7,6 @@ require (
 	github.com/goccy/go-json v0.10.5
 	github.com/joho/godotenv v1.5.1
 	github.com/pymaxion/geographiclib-go/v2 v2.1.2
-	github.com/sethvargo/go-limiter v1.2.0
 	github.com/twpayne/go-polyline v1.1.1
 )
 

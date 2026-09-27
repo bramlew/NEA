@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"slices"
@@ -18,7 +19,25 @@ import (
 const EndpointMatrix = "https://api.heigit.org/openrouteservice/v2/matrix/driving-hgv"
 const EndpointDirections = "https://api.heigit.org/openrouteservice/v2/directions/driving-hgv"
 
-var client = &http.Client{Timeout: 5 * time.Second}
+var client = &http.Client{
+	// Create an HTTP client to be used for all ORS requests
+	// Transport values are all default values from the http.DefaultTransport variable, with MaxIdleConnsPerHost being
+	// modified to be 100, rather than 2, which crucially allows for lots of active TCP connections to the ORS API.
+	Timeout: 5 * time.Second,
+	Transport: &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
+		ForceAttemptHTTP2:     true,
+		MaxIdleConns:          100,
+		MaxIdleConnsPerHost:   100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+	},
+}
 
 func ORSRequest(payload []byte, endpoint string) (*http.Response, error) {
 	// Make an API request to the given ORS endpoint
