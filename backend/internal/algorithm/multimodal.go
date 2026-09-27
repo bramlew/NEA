@@ -51,8 +51,13 @@ func ConstructMultimodalMatrix(locations []models.Coords) (*models.Matrix, error
 	return mat, nil
 }
 
-func GetPolylines(order []int, locations []models.Coords) {
-
+func GetPolylines(order []*models.Leg) {
+	// Get the polylines for a given tour
+	for i, leg := range order {
+		if leg.IsRoad {
+			polylineStr, dist, err := client.PolylineRequest()
+		}
+	}
 }
 
 func updateDists(mat *models.Matrix, locations []models.Coords, origins []int, dests []int) {

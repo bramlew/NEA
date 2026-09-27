@@ -50,13 +50,13 @@ func optimise(c *gin.Context) {
 		order[i] = locations[locationIndex]
 	}
 	// Make a weight list of individual legs
-	weights := make([]float64, length)
+	legs := make([]*models.Leg, length)
 	for i := 0; i < length-1; i++ {
-		weights[i] = mat.Matrix[algorithm.LookupIndex(tour.Order[i], tour.Order[i+1], mat.Cols)].Distance
+		legs[i] = mat.Matrix[algorithm.LookupIndex(tour.Order[i], tour.Order[i+1], mat.Cols)]
 	}
 	response := models.Response{
 		Locations:   order,
-		Weights:     weights,
+		Weights:     legs,
 		TotalWeight: tour.TotalWeight,
 	}
 	c.JSON(http.StatusOK, gin.H{"route": response})

@@ -138,13 +138,36 @@ func MatrixRequest(origins []models.Coords, dests []models.Coords) (*models.Matr
 	return mat, nil
 }
 
-func PolylineRequest(origin models.Coords, dest models.Coords) (string, error) {
+func PolylineRequest(origin models.Coords, dest models.Coords) (string, float64, error) {
 	payload := models.PolylinePayload{
 		Coordinates:      parseCoordsList([]models.Coords{origin, dest}),
 		GeometrySimplify: true,
 		Instructions:     false,
 		Units:            "km",
 	}
+
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return "", 0.0, fmt.Errorf("error parsing payload: %v", err)
+	}
+	res, err := ORSRequest(jsonPayload, EndpointDirections)
+	if err != nil {
+		return "", 0.0, err
+	}
+	defer res.Body.Close()
+	var resStruct models.PolylineResponse
+	resBody, err := io.ReadAll(res.Body)
+	if err != nil {
+		return "", 0.0, fmt.Errorf("error reading response: %v", err)
+	}
+	err = json.Unmarshal(resBody, &resStruct)
+	if err != nil {
+		return "", 0.0, fmt.Errorf("error parsing json: %v", err)
+	}
+
+	routeDetails := resStruct.Routes[0]
+	polyline, distance := routeDetails.Geometry, routeDetails.Summary.Distance
+	return polyline, distance, nil
 }
 
 func parseCoordsList(coords []models.Coords) [][]float64 {
