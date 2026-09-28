@@ -1,7 +1,6 @@
 package algorithm
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/bramlew/NEA/backend/internal/models"
@@ -26,9 +25,17 @@ func ConstructMatrix(locations []models.Coords) (*models.Matrix, error) {
 				if err != nil {
 					return nil, err
 				}
-				mat[index] = &models.Leg{Distance: dist}
+				mat[index] = &models.Leg{
+					Distance: dist,
+					Origin:   origin,
+					Dest:     dest,
+				}
 			} else {
-				mat[index] = &models.Leg{Distance: inf}
+				mat[index] = &models.Leg{
+					Distance: inf,
+					Origin:   origin,
+					Dest:     dest,
+				}
 			}
 		}
 	}
@@ -43,6 +50,7 @@ func LookupIndex(i int, j int, cols int) int {
 	return i*cols + j
 }
 
+/*
 func PrintMatrix(mat *models.Matrix) {
 	// Output every item in the matrix to the console
 	var printStr string
@@ -63,3 +71,4 @@ func ParseJsonResponse(mat *models.Matrix) {
 		}
 	}
 }
+*/

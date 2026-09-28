@@ -54,7 +54,7 @@ func calcDMax(locations []models.Coords) (float64, int, error) {
 	start, end := 0, len(locations)-1
 	ALoc := locations[start]
 	BLoc := locations[end]
-	c, err := GreatCircleDistance(ALoc, BLoc)
+	c, err := AngularGCD(ALoc, BLoc)
 	if err != nil {
 		return 0.0, 0, fmt.Errorf("error calculating great circle distance between %v and %v: %v", ALoc, BLoc, err)
 	}
@@ -68,11 +68,11 @@ func calcDMax(locations []models.Coords) (float64, int, error) {
 		// d is the side opposite A in a right spherical triangle between A, C, and the point at which the perpendicular
 		// between C and the line AB intersects AB
 		CLoc := locations[i]
-		a, err := GreatCircleDistance(BLoc, CLoc)
+		a, err := AngularGCD(BLoc, CLoc)
 		if err != nil {
 			return 0.0, 0, fmt.Errorf("error calculating great circle distance between %v and %v: %v", BLoc, CLoc, err)
 		}
-		b, err := GreatCircleDistance(ALoc, CLoc)
+		b, err := AngularGCD(ALoc, CLoc)
 		if err != nil {
 			return 0.0, 0, fmt.Errorf("error calculating great circle distance between %v and %v: %v", ALoc, CLoc, err)
 		}
@@ -82,7 +82,7 @@ func calcDMax(locations []models.Coords) (float64, int, error) {
 		} else if B := SLCAngle(a, c, b); B >= math.Pi/2 {
 			d = a
 		} else {
-			d = SLSSide(A, math.Pi/2, b)
+			d = SLSSide(A, math.Pi/2, b) * EarthRadKm
 		}
 		if d > dMax {
 			dMax, index = d, i

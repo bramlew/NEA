@@ -21,3 +21,8 @@ func SLSSide(A float64, B float64, b float64) float64 {
 	// General formula for the spherical law of sines rearranged for a side, a
 	return math.Asin(math.Sin(A) * math.Sin(b) / math.Sin(B))
 }
+
+func PErr(calculated float64, real float64) float64 {
+	// Calculate the percentage error between a calculated value and a real value
+	return math.Abs(calculated-real) / real * 100
+}

@@ -27,10 +27,7 @@ func MultiTSP(mat *models.Matrix) (*models.Tour, error) {
 		}
 	}
 	if best.Order == nil {
-		return &models.Tour{
-			TotalWeight: 0,
-			Order:       nil,
-		}, errors.New("no best tour found")
+		return nil, errors.New("no best tour found")
 	}
 	return best, nil
 }

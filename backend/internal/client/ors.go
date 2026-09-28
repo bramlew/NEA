@@ -16,8 +16,9 @@ import (
 	"github.com/joho/godotenv"
 )
 
-const EndpointMatrix = "https://api.heigit.org/openrouteservice/v2/matrix/driving-hgv"
-const EndpointDirections = "https://api.heigit.org/openrouteservice/v2/directions/driving-hgv"
+const EndpointMatrix = "https://api.heigit.org/openrouteservice/v2/matrix/driving-hgv"         // ORS API URL for Matrix endpoint
+const EndpointDirections = "https://api.heigit.org/openrouteservice/v2/directions/driving-hgv" // ORS API URL for Directions endpoint
+const StandardDistanceUnit = "km"                                                              // Standard distance unit used throughout payloads
 
 var client = &http.Client{
 	// Create an HTTP client to be used for all ORS requests
@@ -71,7 +72,7 @@ func ORSRequest(payload []byte, endpoint string) (*http.Response, error) {
 	return res, nil
 }
 
-func MatrixRequest(origins []models.Coords, dests []models.Coords) (*models.Matrix, error) {
+func MatrixRequest(origins []models.Coords, dests []models.Coords) ([]*models.Leg, error) {
 	// Make an ORS Matrix request with given origins and destinations.
 	originsLength := len(origins)
 	size := originsLength * len(dests)
@@ -87,7 +88,7 @@ func MatrixRequest(origins []models.Coords, dests []models.Coords) (*models.Matr
 		payload = models.MatrixPayload{
 			Locations: parseCoordsList(origins),
 			Metrics:   []string{"distance"},
-			Units:     "km",
+			Units:     StandardDistanceUnit,
 		}
 	} else {
 		combined := slices.Concat(origins, dests)
@@ -96,7 +97,7 @@ func MatrixRequest(origins []models.Coords, dests []models.Coords) (*models.Matr
 			Destinations: genRangeSlice(originsLength, len(combined)),
 			Metrics:      []string{"distance"},
 			Sources:      genRangeSlice(0, originsLength),
-			Units:        "km",
+			Units:        StandardDistanceUnit,
 		}
 	}
 
@@ -122,30 +123,33 @@ func MatrixRequest(origins []models.Coords, dests []models.Coords) (*models.Matr
 		return nil, fmt.Errorf("error parsing json: %v", err)
 	}
 
-	// Construct a matrix from the returned 2D slice
-	cols := len(resStruct.Distances)
-	mat := &models.Matrix{
-		Matrix: make([]*models.Leg, cols*cols),
-		Cols:   cols,
-	}
-
-	// Make the 2D slice into a 1D flat slice for faster indexing later
-	for i, row := range resStruct.Distances {
-		for j, dist := range row {
-			mat.Matrix[lookupIndex(i, j, cols)] = &models.Leg{Distance: dist}
+	// Create a slice of legs with the matrix distance values and correct metadata
+	dists := resStruct.Distances
+	legs := make([]*models.Leg, len(dists))
+	for i := range dists {
+		legs[i] = &models.Leg{
+			Distance: dists[i][i],
+			Origin:   origins[i],
+			Dest:     dests[i],
+			IsRoad:   true,
 		}
 	}
-	return mat, nil
+
+	return legs, nil
 }
 
-func PolylineRequest(origin models.Coords, dest models.Coords) (string, float64, error) {
+func PolylineRequest(leg *models.Leg) (string, float64, error) {
+	// Make an ORS polyline (i.e. directions) request for a given leg
+
+	// Initialise the request payload
 	payload := models.PolylinePayload{
-		Coordinates:      parseCoordsList([]models.Coords{origin, dest}),
+		Coordinates:      parseCoordsList([]models.Coords{leg.Origin, leg.Dest}),
 		GeometrySimplify: true,
 		Instructions:     false,
-		Units:            "km",
+		Units:            StandardDistanceUnit,
 	}
 
+	// Send the request
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return "", 0.0, fmt.Errorf("error parsing payload: %v", err)
@@ -154,6 +158,8 @@ func PolylineRequest(origin models.Coords, dest models.Coords) (string, float64,
 	if err != nil {
 		return "", 0.0, err
 	}
+
+	// Read the returned HTTP response and parse it
 	defer res.Body.Close()
 	var resStruct models.PolylineResponse
 	resBody, err := io.ReadAll(res.Body)
@@ -165,6 +171,7 @@ func PolylineRequest(origin models.Coords, dest models.Coords) (string, float64,
 		return "", 0.0, fmt.Errorf("error parsing json: %v", err)
 	}
 
+	// Return the details of the requested polyline
 	routeDetails := resStruct.Routes[0]
 	polyline, distance := routeDetails.Geometry, routeDetails.Summary.Distance
 	return polyline, distance, nil
