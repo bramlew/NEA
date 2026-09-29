@@ -16,15 +16,15 @@ import (
 	"github.com/joho/godotenv"
 )
 
-const EndpointMatrix = "https://api.heigit.org/openrouteservice/v2/matrix/driving-hgv"         // ORS API URL for Matrix endpoint
-const EndpointDirections = "https://api.heigit.org/openrouteservice/v2/directions/driving-hgv" // ORS API URL for Directions endpoint
+const EndpointMatrix = "https://api.heigit.org/openrouteservice/v2/matrix/driving-car"         // ORS API URL for Matrix endpoint
+const EndpointDirections = "https://api.heigit.org/openrouteservice/v2/directions/driving-car" // ORS API URL for Directions endpoint
 const StandardDistanceUnit = "km"                                                              // Standard distance unit used throughout payloads
 
 var client = &http.Client{
 	// Create an HTTP client to be used for all ORS requests
 	// Transport values are all default values from the http.DefaultTransport variable, with MaxIdleConnsPerHost being
 	// modified to be 100, rather than 2, which crucially allows for lots of active TCP connections to the ORS API.
-	Timeout: 5 * time.Second,
+	Timeout: 15 * time.Second,
 	Transport: &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
 		DialContext: (&net.Dialer{
@@ -72,7 +72,7 @@ func ORSRequest(payload []byte, endpoint string) (*http.Response, error) {
 	return res, nil
 }
 
-func MatrixRequest(origins []models.Coords, dests []models.Coords) ([]*models.Leg, error) {
+func MatrixRequest(origins []models.Coords, dests []models.Coords) (*models.Matrix, error) {
 	// Make an ORS Matrix request with given origins and destinations.
 	originsLength := len(origins)
 	size := originsLength * len(dests)
@@ -123,19 +123,24 @@ func MatrixRequest(origins []models.Coords, dests []models.Coords) ([]*models.Le
 		return nil, fmt.Errorf("error parsing json: %v", err)
 	}
 
-	// Create a slice of legs with the matrix distance values and correct metadata
-	dists := resStruct.Distances
-	legs := make([]*models.Leg, len(dists))
-	for i := range dists {
-		legs[i] = &models.Leg{
-			Distance: dists[i][i],
-			Origin:   origins[i],
-			Dest:     dests[i],
-			IsRoad:   true,
-		}
+	// Construct a matrix from the returned 2D slice
+	cols := len(resStruct.Distances)
+	mat := &models.Matrix{
+		Matrix: make([]*models.Leg, cols*cols),
+		Cols:   cols,
 	}
 
-	return legs, nil
+	// Make the 2D slice into a 1D flat slice for faster indexing later
+	for i, row := range resStruct.Distances {
+		for j, dist := range row {
+			mat.Matrix[lookupIndex(i, j, cols)] = &models.Leg{
+				Distance: dist,
+				Origin:   origins[i],
+				Dest:     dests[j],
+			}
+		}
+	}
+	return mat, nil
 }
 
 func PolylineRequest(leg *models.Leg) (string, float64, error) {

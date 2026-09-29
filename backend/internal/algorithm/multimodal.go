@@ -22,6 +22,8 @@ func ConstructMultimodalMatrix(locations []models.Coords) (*models.Matrix, error
 	}
 	origins := make([]int, 0, MaxMatrixLength)
 	dests := make([]int, 0, MaxMatrixLength)
+	originPairs := make([]int, 0, MaxMatrixLength*MaxMatrixLength)
+	destPairs := make([]int, 0, MaxMatrixLength*MaxMatrixLength)
 
 	// For every item on one side of the diagonal of the matrix, calculate the multimodal distance
 	var wg sync.WaitGroup
@@ -30,15 +32,21 @@ func ConstructMultimodalMatrix(locations []models.Coords) (*models.Matrix, error
 			currentLeg := mat.Matrix[LookupIndex(i, j, mat.Cols)]
 			if currentLeg.Distance < MaxRoadDist {
 				// Road route
-				origins = append(origins, i)
-				dests = append(dests, j)
+				if !slices.Contains(origins, i) {
+					origins = append(origins, i)
+				}
+				originPairs = append(originPairs, i)
+				if !slices.Contains(dests, j) {
+					dests = append(dests, j)
+				}
+				destPairs = append(destPairs, j)
 			}
 			// Do nothing for air route, as it is already in the correct form
-			if len(origins) >= MaxMatrixLength {
+			if len(origins) >= MaxMatrixLength || len(dests) >= MaxMatrixLength {
 				// Execute the request (reached max capacity)
 				reqOrigins, reqDests := slices.Clone(origins), slices.Clone(dests)
 				wg.Go(func() {
-					updateDists(mat, reqOrigins, reqDests)
+					updateDists(mat, locations, reqOrigins, reqDests, originPairs, destPairs)
 				})
 				origins = make([]int, 0, MaxMatrixLength)
 				dests = make([]int, 0, MaxMatrixLength)
@@ -47,8 +55,9 @@ func ConstructMultimodalMatrix(locations []models.Coords) (*models.Matrix, error
 	}
 	if len(origins) > 0 {
 		// If there are still locations left, request them now
+		log.Printf("requesting origins (length > 0)")
 		wg.Go(func() {
-			updateDists(mat, origins, dests)
+			updateDists(mat, locations, origins, dests, originPairs, destPairs)
 		})
 	}
 	wg.Wait()
@@ -90,23 +99,25 @@ func changePolyline(leg *models.Leg) {
 	leg.Polyline = decimated
 }
 
-func updateDists(mat *models.Matrix, origins []int, dests []int) {
+func updateDists(mat *models.Matrix, locations []models.Coords, origins []int, dests []int, originPairs []int, destPairs []int) {
 	// Update the distances to be road distances in a matrix by using an ORS request
 
-	originsLength := len(origins)
-	destsLength := len(dests)
+	originsLength := len(originPairs)
+	destsLength := len(destPairs)
+
 	if originsLength != destsLength {
 		log.Printf("origins array is not same length as dests array, lengths %d and %d respectively", originsLength, destsLength)
 		return
 	}
 
 	// Make arrays for the origins and destinations as coordinates
-	requestOrigins := make([]models.Coords, originsLength)
-	requestDests := make([]models.Coords, destsLength)
-	for i := range origins {
-		reqPair := mat.Matrix[LookupIndex(origins[i], dests[i], mat.Cols)]
-		requestOrigins[i] = reqPair.Origin
-		requestDests[i] = reqPair.Dest
+	requestOrigins := make([]models.Coords, len(origins))
+	for i, origin := range origins {
+		requestOrigins[i] = locations[origin]
+	}
+	requestDests := make([]models.Coords, len(dests))
+	for i, dest := range dests {
+		requestOrigins[i] = locations[dest]
 	}
 
 	// Calculate the road distances
@@ -115,17 +126,17 @@ func updateDists(mat *models.Matrix, origins []int, dests []int) {
 		log.Printf("error calculating road distances: %v", err)
 		return
 	}
-	for i, leg := range newDists {
+	for i := range originPairs {
 		// For every pair of locations, correct the current great-circle (i.e. air) distance to the road distance if a
 		// road distance was calculated
+		leg := newDists.Matrix[LookupIndex(slices.Index(origins, originPairs[i]), slices.Index(dests, destPairs[i]), mat.Cols)]
 		if leg.Distance != 0 {
-			mat.Matrix[LookupIndex(origins[i], dests[i], mat.Cols)] = leg
-			mat.Matrix[LookupIndex(dests[i], origins[i], mat.Cols)] = &models.Leg{
-				Distance: leg.Distance,
-				Origin:   leg.Dest,
-				Dest:     leg.Origin,
-				IsRoad:   true,
-			}
+			matLeg := mat.Matrix[LookupIndex(originPairs[i], destPairs[i], mat.Cols)]
+			matLegReversed := mat.Matrix[LookupIndex(destPairs[i], originPairs[i], mat.Cols)]
+			matLeg.Distance = leg.Distance
+			matLegReversed.Distance = leg.Distance
+			matLeg.IsRoad = true
+			matLegReversed.IsRoad = true
 		}
 	}
 }
