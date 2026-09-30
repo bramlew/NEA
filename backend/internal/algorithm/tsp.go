@@ -2,12 +2,13 @@ package algorithm
 
 import (
 	"errors"
-	"log"
 	"math"
 	"slices"
 
 	"github.com/bramlew/NEA/backend/internal/models"
 )
+
+const deltaThreshold = -1e-9 // Threshold delta in order to consider the route as optimal
 
 func MultiTSP(mat *models.Matrix) (*models.Tour, error) {
 	// Solve a TSP fully in an asynchronous manner using a given adjacency matrix
@@ -36,11 +37,7 @@ func MultiTSP(mat *models.Matrix) (*models.Tour, error) {
 func solveTSP(mat *models.Matrix, startNode int, result chan *models.Tour) {
 	// Solve a single TSP synchronously
 	baseline := NearestNeighbour(mat, startNode)
-	if startNode == 7 {
-		log.Printf("baseline order: %v", baseline)
-	}
 	optimised := ThreeOpt(mat, baseline)
-	log.Printf("finished 3-opt for start node %d", startNode)
 	weight := calcWeight(mat, optimised)
 	result <- &models.Tour{
 		TotalWeight: weight,
@@ -116,7 +113,7 @@ func ThreeOpt(mat *models.Matrix, baseline []int) []int {
 							mat.Matrix[LookupIndex(route[order[0][1]], route[order[1][0]], mat.Cols)].Distance +
 							mat.Matrix[LookupIndex(route[order[1][1]], route[segments[3][0]], mat.Cols)].Distance
 						delta := newWeight - oldWeight
-						if delta < optimalDelta {
+						if delta < optimalDelta && delta < deltaThreshold {
 							// If the delta is better than the current best delta in the whole loop, update it
 							optimal = slices.Concat(route[:i+1], getCorrectSlice(route, order[0][0], order[0][1]), getCorrectSlice(route, order[1][0], order[1][1]), route[k+1:])
 							optimalDelta = delta

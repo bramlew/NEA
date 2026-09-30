@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/bramlew/NEA/backend/internal/algorithm"
@@ -48,36 +47,12 @@ func optimise(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
 		return
 	}
-	log.Print("finished constructing mm matrix, starting tsp")
-
-	// Verify matrix is asymmetrical
-	for i := 0; i < mat.Cols; i++ {
-		for j := 0; j < mat.Cols; j++ {
-			leg := mat.Matrix[algorithm.LookupIndex(i, j, mat.Cols)]
-			legReversed := mat.Matrix[algorithm.LookupIndex(j, i, mat.Cols)]
-			if leg.Distance != legReversed.Distance {
-				log.Printf("leg distance not equal to reversed distance: %2.f vs %.2f", leg.Distance, legReversed.Distance)
-			}
-			if leg.Origin.Lon != legReversed.Dest.Lon || leg.Origin.Lat != legReversed.Dest.Lat {
-				log.Printf("leg origins are incorrect: %+v vs %+v reversed", leg.Origin, legReversed.Dest)
-			}
-			if leg.Dest.Lon != legReversed.Origin.Lon || leg.Dest.Lat != legReversed.Origin.Lat {
-				log.Printf("leg dests are incorrect: %+v vs %+v reversed", leg.Dest, legReversed.Origin)
-			}
-			if leg.Distance <= 0.01 && i != j {
-				log.Printf("zero leg found outside diagonal: index [%d, %d], distance %.2f", i, j, leg.Distance)
-			}
-		}
-	}
-
-	// algorithm.ParseJsonResponse(mat)
 	tour, err := algorithm.MultiTSP(mat)
 	if err != nil {
 		// Return an error if the TSP algorithm fails
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	log.Print("finished tsp, starting polyline requests")
 	// Make a list of individual leg details
 	legs := make([]*models.Leg, length-1)
 	for i := 0; i < length-1; i++ {

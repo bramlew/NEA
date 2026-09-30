@@ -9,10 +9,12 @@ import (
 	"github.com/bramlew/NEA/backend/internal/models"
 )
 
-const LengthTolerance = 1.0 // Maximum error tolerance between the polyline distance and matrix distance
-const RDPTolerance = 0.1    // Tolerance to be passed into RDP function
-const MaxRoadDist = 2000.0  // Maximum distance before defaulting to using air travel
-const MaxMatrixLength = 59  // Maximum length of a square matrix for an ORS request
+const LengthTolerance = 1.0  // Maximum error tolerance between the polyline distance and matrix distance
+const RoadDistTolerance = 50 // Maximum error tolerance between great-circle distance and matrix distance
+const RDPTolerance = 0.1     // Tolerance to be passed into RDP function
+
+const MaxRoadDist = 2000.0 // Maximum distance before defaulting to using air travel
+const MaxMatrixLength = 59 // Maximum length of a square matrix for an ORS request
 
 func ConstructMultimodalMatrix(locations []models.Coords) (*models.Matrix, error) {
 	// Calculate the multimodal distance between two sets of coordinates
@@ -66,7 +68,6 @@ func ConstructMultimodalMatrix(locations []models.Coords) (*models.Matrix, error
 	}
 	if len(origins) > 0 {
 		// If there are still locations left, request them now
-		log.Printf("requesting origins (length > 0)")
 		wg.Go(func() {
 			updateDists(mat, locations, origins, dests, originPairs, destPairs)
 		})
@@ -100,7 +101,7 @@ func changePolyline(leg *models.Leg) {
 
 	// Calculate the percentage error and log if it is greater than the tolerance
 	pErr := PErr(dist, leg.Distance)
-	if pErr > LengthTolerance {
+	if pErr >= LengthTolerance {
 		log.Printf("error between polyline length and matrix length greater than tolerance: %.2f error", pErr)
 	}
 	decimated, err := DecimateLine(polylineStr, RDPTolerance)
@@ -132,28 +133,23 @@ func updateDists(mat *models.Matrix, locations []models.Coords, origins []int, d
 	requestOrigins := make([]models.Coords, len(origins))
 	for i, origin := range origins {
 		requestOrigins[i] = locations[origin]
-		log.Printf("origin %d: %+v", i, locations[origin])
 	}
 	requestDests := make([]models.Coords, len(dests))
 	for i, dest := range dests {
-		log.Printf("dest %d: %+v", i, locations[dest])
 		requestDests[i] = locations[dest]
 	}
 
 	// Calculate the road distances
-	log.Printf("originPairs:%+v\ndestPairs:%+v", originPairs, destPairs)
 	dists, err := client.MatrixRequest(requestOrigins, requestDests, originPairs, destPairs)
 	if err != nil {
 		log.Printf("error calculating road distances: %v", err)
 		return
 	}
-	log.Printf("%+v", dists)
 	for i, dist := range dists {
 		// For every pair of locations, correct the current great-circle (i.e. air) distance to the road distance if a
 		// road distance was calculated
-		if dist != 0 {
-			log.Printf("number leg: %.2f", dist)
-			matLeg := mat.Matrix[LookupIndex(origins[originPairs[i]], dests[destPairs[i]], mat.Cols)]
+		matLeg := mat.Matrix[LookupIndex(origins[originPairs[i]], dests[destPairs[i]], mat.Cols)]
+		if dist != 0 && PErr(dist, matLeg.Distance) <= RoadDistTolerance {
 			matLegReversed := mat.Matrix[LookupIndex(dests[destPairs[i]], origins[originPairs[i]], mat.Cols)]
 			matLeg.Distance = dist
 			matLegReversed.Distance = dist

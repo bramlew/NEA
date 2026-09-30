@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -25,7 +24,7 @@ var client = &http.Client{
 	// Create an HTTP client to be used for all ORS requests
 	// Transport values are all default values from the http.DefaultTransport variable, with MaxIdleConnsPerHost being
 	// modified to be 100, rather than 2, which crucially allows for lots of active TCP connections to the ORS API.
-	Timeout: 15 * time.Second,
+	Timeout: 5 * time.Second,
 	Transport: &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
 		DialContext: (&net.Dialer{
@@ -77,7 +76,6 @@ func MatrixRequest(origins []models.Coords, dests []models.Coords, originPairs [
 	// Make an ORS Matrix request with given origins and destinations.
 	originsLength := len(origins)
 	size := originsLength * len(dests)
-	log.Printf("dests:\n%+v\norigins:\n%+v", dests, origins)
 
 	// Firstly ensure that the matrix size is within the API limits, i.e. max 3500 elements in the matrix
 	if size > 3500 {
@@ -105,8 +103,6 @@ func MatrixRequest(origins []models.Coords, dests []models.Coords, originPairs [
 
 	// Send the request
 	jsonPayload, err := json.Marshal(payload)
-	log.Printf("total length: %d", len(payload.Locations))
-	log.Printf("payload:\n%+v", payload)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing payload: %v", err)
 	}
@@ -132,7 +128,6 @@ func MatrixRequest(origins []models.Coords, dests []models.Coords, originPairs [
 	dists := make([]float64, len(originPairs))
 	for i, originPair := range originPairs {
 		destPair := destPairs[i]
-		log.Printf("originPair: %d, destPair: %d", originPair, destPair)
 		dists[i] = resDists[originPair][destPair]
 	}
 	return dists, nil
@@ -194,10 +189,4 @@ func genRangeSlice(start int, end int) []int {
 		ints[i] = start + i
 	}
 	return ints
-}
-
-func lookupIndex(i int, j int, cols int) int {
-	// Returns the flat index from a given 2D index (client package version, as you can't have two packages import each
-	// other)
-	return i*cols + j
 }
