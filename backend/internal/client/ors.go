@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"net/http"
 	"os"
@@ -72,10 +73,11 @@ func ORSRequest(payload []byte, endpoint string) (*http.Response, error) {
 	return res, nil
 }
 
-func MatrixRequest(origins []models.Coords, dests []models.Coords) (*models.Matrix, error) {
+func MatrixRequest(origins []models.Coords, dests []models.Coords, originPairs []int, destPairs []int) ([]float64, error) {
 	// Make an ORS Matrix request with given origins and destinations.
 	originsLength := len(origins)
 	size := originsLength * len(dests)
+	log.Printf("dests:\n%+v\norigins:\n%+v", dests, origins)
 
 	// Firstly ensure that the matrix size is within the API limits, i.e. max 3500 elements in the matrix
 	if size > 3500 {
@@ -103,6 +105,8 @@ func MatrixRequest(origins []models.Coords, dests []models.Coords) (*models.Matr
 
 	// Send the request
 	jsonPayload, err := json.Marshal(payload)
+	log.Printf("total length: %d", len(payload.Locations))
+	log.Printf("payload:\n%+v", payload)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing payload: %v", err)
 	}
@@ -123,24 +127,15 @@ func MatrixRequest(origins []models.Coords, dests []models.Coords) (*models.Matr
 		return nil, fmt.Errorf("error parsing json: %v", err)
 	}
 
-	// Construct a matrix from the returned 2D slice
-	cols := len(resStruct.Distances)
-	mat := &models.Matrix{
-		Matrix: make([]*models.Leg, cols*cols),
-		Cols:   cols,
+	// Get only the distances which were requested rather than the entire matrix
+	resDists := resStruct.Distances
+	dists := make([]float64, len(originPairs))
+	for i, originPair := range originPairs {
+		destPair := destPairs[i]
+		log.Printf("originPair: %d, destPair: %d", originPair, destPair)
+		dists[i] = resDists[originPair][destPair]
 	}
-
-	// Make the 2D slice into a 1D flat slice for faster indexing later
-	for i, row := range resStruct.Distances {
-		for j, dist := range row {
-			mat.Matrix[lookupIndex(i, j, cols)] = &models.Leg{
-				Distance: dist,
-				Origin:   origins[i],
-				Dest:     dests[j],
-			}
-		}
-	}
-	return mat, nil
+	return dists, nil
 }
 
 func PolylineRequest(leg *models.Leg) (string, float64, error) {

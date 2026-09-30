@@ -2,6 +2,7 @@ package algorithm
 
 import (
 	"errors"
+	"log"
 	"math"
 	"slices"
 
@@ -35,7 +36,11 @@ func MultiTSP(mat *models.Matrix) (*models.Tour, error) {
 func solveTSP(mat *models.Matrix, startNode int, result chan *models.Tour) {
 	// Solve a single TSP synchronously
 	baseline := NearestNeighbour(mat, startNode)
+	if startNode == 7 {
+		log.Printf("baseline order: %v", baseline)
+	}
 	optimised := ThreeOpt(mat, baseline)
+	log.Printf("finished 3-opt for start node %d", startNode)
 	weight := calcWeight(mat, optimised)
 	result <- &models.Tour{
 		TotalWeight: weight,
