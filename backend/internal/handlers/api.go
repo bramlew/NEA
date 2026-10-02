@@ -10,13 +10,12 @@ import (
 )
 
 const MaxNoLocations = 30 // Maximum no. of locations which can be provided to the API
+const MinNoLocations = 2  // Minimum no. of locations which can be provided to the API
 
 func Start() {
-	// Start the Gin server and route(s)
+	// Start the Gin server and optimisation route
 	router := gin.Default()
-
 	router.POST("/optimise", optimise)
-
 	err := router.Run(":8080")
 	if err != nil {
 		return
@@ -36,10 +35,15 @@ func optimise(c *gin.Context) {
 	length := len(locations)
 	if length > MaxNoLocations {
 		// Return an error if too many locations are given
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
+		c.JSON(http.StatusRequestEntityTooLarge, gin.H{
 			"error": fmt.Sprintf("too many locations provided: %d > %d (max)", length, MaxNoLocations),
 		})
 		return
+	} else if length < MinNoLocations {
+		// Return an error if too few locations are given
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error": fmt.Sprintf("too few locations provided: %d < %d (min)", length, MinNoLocations),
+		})
 	}
 	mat, err := algorithm.ConstructMultimodalMatrix(locations)
 	if err != nil {
@@ -58,10 +62,11 @@ func optimise(c *gin.Context) {
 	for i := 0; i < length-1; i++ {
 		legs[i] = mat.Matrix[algorithm.LookupIndex(tour.Order[i], tour.Order[i+1], mat.Cols)]
 	}
-	algorithm.AddPolylines(legs) // Add the polylines to the legs array
+	// Add the polylines to the legs array
+	algorithm.AddPolylines(legs)
 	response := models.Response{
 		Route:       legs,
 		TotalWeight: tour.TotalWeight,
 	}
-	c.JSON(http.StatusOK, gin.H{"route": response})
+	c.JSON(http.StatusOK, gin.H{"details": response})
 }

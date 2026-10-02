@@ -9,9 +9,9 @@ import (
 	"github.com/bramlew/NEA/backend/internal/models"
 )
 
-const LengthTolerance = 1.0  // Maximum error tolerance between the polyline distance and matrix distance
-const RoadDistTolerance = 50 // Maximum error tolerance between great-circle distance and matrix distance
-const RDPTolerance = 0.1     // Tolerance to be passed into RDP function
+const PolylineTolerance = 1.0 // Maximum error tolerance between the polyline distance and matrix distance
+const MatrixTolerance = 50.0  // Maximum error tolerance between great-circle distance and matrix distance
+const RDPTolerance = 0.1      // Tolerance to be passed into RDP function
 
 const MaxRoadDist = 2000.0 // Maximum distance before defaulting to using air travel
 const MaxMatrixLength = 59 // Maximum length of a square matrix for an ORS request
@@ -38,6 +38,10 @@ func ConstructMultimodalMatrix(locations []models.Coords) (*models.Matrix, error
 			currentLeg := mat.Matrix[LookupIndex(i, j, mat.Cols)]
 			if currentLeg.Distance < MaxRoadDist {
 				// Road route
+				// For each origin and destination, check if it is already in the origins/dests arrays
+				// If it is, append the index of that location in the array to the pairs array
+				// If not, append the location index to the array and also append the index of this new element to the
+				// correct pairs array
 				if !slices.Contains(origins, i) {
 					originPairs = append(originPairs, len(origins))
 					origins = append(origins, i)
@@ -101,7 +105,7 @@ func changePolyline(leg *models.Leg) {
 
 	// Calculate the percentage error and log if it is greater than the tolerance
 	pErr := PErr(dist, leg.Distance)
-	if pErr >= LengthTolerance {
+	if pErr >= PolylineTolerance {
 		log.Printf("error between polyline length and matrix length greater than tolerance: %.2f error", pErr)
 	}
 	decimated, err := DecimateLine(polylineStr, RDPTolerance)
@@ -114,14 +118,13 @@ func changePolyline(leg *models.Leg) {
 func updateDists(mat *models.Matrix, locations []models.Coords, origins []int, dests []int, originPairs []int, destPairs []int) {
 	// Update the distances to be road distances in a matrix by using an ORS request
 
+	// Validate the lengths of the arrays passed into the function
 	originsLength := len(originPairs)
 	destsLength := len(destPairs)
-
 	if originsLength != destsLength {
 		log.Printf("origins array is not same length as dests array, lengths %d and %d respectively", originsLength, destsLength)
 		return
 	}
-
 	originPairsLength := len(originPairs)
 	destPairsLength := len(destPairs)
 	if originPairsLength != destPairsLength {
@@ -147,9 +150,9 @@ func updateDists(mat *models.Matrix, locations []models.Coords, origins []int, d
 	}
 	for i, dist := range dists {
 		// For every pair of locations, correct the current great-circle (i.e. air) distance to the road distance if a
-		// road distance was calculated
+		// road distance was calculated and the error between the distances is in the tolerance
 		matLeg := mat.Matrix[LookupIndex(origins[originPairs[i]], dests[destPairs[i]], mat.Cols)]
-		if dist != 0 && PErr(dist, matLeg.Distance) <= RoadDistTolerance {
+		if dist != 0 && PErr(dist, matLeg.Distance) <= MatrixTolerance {
 			matLegReversed := mat.Matrix[LookupIndex(dests[destPairs[i]], origins[originPairs[i]], mat.Cols)]
 			matLeg.Distance = dist
 			matLegReversed.Distance = dist

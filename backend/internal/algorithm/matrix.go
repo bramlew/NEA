@@ -49,26 +49,3 @@ func LookupIndex(i int, j int, cols int) int {
 	// Returns the flat index from a given 2D index
 	return i*cols + j
 }
-
-/*
-func PrintMatrix(mat *models.Matrix) {
-	// Output every item in the matrix to the console
-	var printStr string
-	for i, route := range mat.Matrix {
-		if i%mat.Cols == 0 {
-			printStr += "\n"
-		}
-		printStr += fmt.Sprintf("%g", route.Distance) + "      "
-	}
-	fmt.Println(printStr)
-}
-
-func ParseJsonResponse(mat *models.Matrix) {
-	// Replace all occurrences of infinity length as zero, as infinity cannot be passed back into JSON
-	for _, route := range mat.Matrix {
-		if math.IsInf(route.Distance, 1) {
-			route.Distance = 0
-		}
-	}
-}
-*/

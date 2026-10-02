@@ -41,7 +41,7 @@ func TestNearestNeighbourAccuracy(t *testing.T) {
 			visitedIndexes := make([]int, 0, N)
 			visitedIndexes = append(visitedIndexes, i)
 			currentNode := i
-			for j := 0; j < N-1; j++ {
+			for j := range N - 1 {
 				nextDist, nextIndex := mat.Matrix[LookupIndex(result[j], result[j+1], N)].Distance, result[j+1]
 				bestDist, bestIndex := math.Inf(1), -1
 				for k := range locations {

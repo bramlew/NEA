@@ -2,7 +2,6 @@ package client
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -13,12 +12,11 @@ import (
 
 	"github.com/bramlew/NEA/backend/internal/models"
 	"github.com/goccy/go-json"
-	"github.com/joho/godotenv"
 )
 
-const EndpointMatrix = "https://api.heigit.org/openrouteservice/v2/matrix/driving-car"         // ORS API URL for Matrix endpoint
-const EndpointDirections = "https://api.heigit.org/openrouteservice/v2/directions/driving-car" // ORS API URL for Directions endpoint
-const StandardDistanceUnit = "km"                                                              // Standard distance unit used throughout payloads
+const EndpointMatrix = "https://api.heigit.org/openrouteservice/v2/matrix/driving-car"       // ORS API URL for Matrix endpoint
+const EndpointPolyline = "https://api.heigit.org/openrouteservice/v2/directions/driving-car" // ORS API URL for Polyline (directions) endpoint
+const StandardDistanceUnit = "km"                                                            // Standard distance unit used throughout payloads
 
 var client = &http.Client{
 	// Create an HTTP client to be used for all ORS requests
@@ -42,9 +40,6 @@ var client = &http.Client{
 
 func ORSRequest(payload []byte, endpoint string) (*http.Response, error) {
 	// Make an API request to the given ORS endpoint
-	if err := godotenv.Load(); err != nil {
-		return nil, errors.New("error loading .env file")
-	}
 	apiKey := os.Getenv("ORS_API_KEY")
 
 	// Create the request and handle errors
@@ -149,7 +144,7 @@ func PolylineRequest(leg *models.Leg) (string, float64, error) {
 	if err != nil {
 		return "", 0.0, fmt.Errorf("error parsing payload: %v", err)
 	}
-	res, err := ORSRequest(jsonPayload, EndpointDirections)
+	res, err := ORSRequest(jsonPayload, EndpointPolyline)
 	if err != nil {
 		return "", 0.0, err
 	}

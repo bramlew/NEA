@@ -11,14 +11,22 @@ import (
 
 func DecimateLine(polylineStr string, tolerance float64) (string, error) {
 	// Decimate a polyline using the Ramer-Douglas-Peucker algorithm
+	// Decode the polyline string into a coords array
 	coords, err := DecodePolyline(polylineStr)
 	if err != nil {
 		return "", err
 	}
+	// Validate the length of the coords array
+	coordsLength := len(coords)
+	if coordsLength < 2 {
+		return "", fmt.Errorf("polyline is too short: length %d", coordsLength)
+	}
+	// Run RDP on the coords array
 	decimated, err := RDP(coords, tolerance)
 	if err != nil {
 		return "", err
 	}
+	// Encode the decimated route back into a polyline and return it
 	decimatedPolyline := EncodePolyline(decimated)
 	return decimatedPolyline, nil
 }
@@ -43,6 +51,7 @@ func RDP(locations []models.Coords, epsilon float64) ([]models.Coords, error) {
 	if err != nil {
 		return nil, err
 	}
+	// Reconstruct the route using the recursively optimised portions
 	full := slices.Concat(before, after[1:])
 	return full, nil
 }

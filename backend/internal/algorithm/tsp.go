@@ -8,7 +8,7 @@ import (
 	"github.com/bramlew/NEA/backend/internal/models"
 )
 
-const deltaThreshold = -1e-9 // Threshold delta in order to consider the route as optimal
+const deltaThreshold = -1e-9 // Threshold delta in order to consider the route as optimal, i.e. to avoid floating-point errors
 
 func MultiTSP(mat *models.Matrix) (*models.Tour, error) {
 	// Solve a TSP fully in an asynchronous manner using a given adjacency matrix
@@ -75,7 +75,7 @@ func ThreeOpt(mat *models.Matrix, baseline []int) []int {
 	route := baseline
 	for {
 		// Until an explicit break of the loop (i.e. it cannot be optimised any more), keep trying to optimise it
-		optimal, optimalDelta := route, 0.0
+		optimal, optimalDelta := route, deltaThreshold
 		for i := 0; i < length-3; i++ {
 			for j := i + 1; j < length-2; j++ {
 				for k := j + 1; k < length-1; k++ {
@@ -113,7 +113,7 @@ func ThreeOpt(mat *models.Matrix, baseline []int) []int {
 							mat.Matrix[LookupIndex(route[order[0][1]], route[order[1][0]], mat.Cols)].Distance +
 							mat.Matrix[LookupIndex(route[order[1][1]], route[segments[3][0]], mat.Cols)].Distance
 						delta := newWeight - oldWeight
-						if delta < optimalDelta && delta < deltaThreshold {
+						if delta < optimalDelta {
 							// If the delta is better than the current best delta in the whole loop, update it
 							optimal = slices.Concat(route[:i+1], getCorrectSlice(route, order[0][0], order[0][1]), getCorrectSlice(route, order[1][0], order[1][1]), route[k+1:])
 							optimalDelta = delta
@@ -122,7 +122,7 @@ func ThreeOpt(mat *models.Matrix, baseline []int) []int {
 				}
 			}
 		}
-		if optimalDelta == 0 {
+		if optimalDelta == deltaThreshold {
 			// If there was no improvement in the delta, break the loop
 			break
 		}

@@ -7,7 +7,7 @@ import (
 	"github.com/bramlew/NEA/backend/internal/models"
 )
 
-const EarthRadKm = 6371.0084
+const EarthRadKm = 6371.0084 // Radius of the Earth measured in km
 
 func GreatCircleDistance(origin models.Coords, dest models.Coords) (float64, error) {
 	// Calculate the great circle distance between two sets of coordinates in km
