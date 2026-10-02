@@ -1,0 +1,31 @@
+FUNCTION calcDMax(locations)
+    VAR d_max = 0
+    VAR index = 0
+    VAR start = 0
+    VAR end = locations.length - 1
+    VAR ALoc = locations[start]
+    VAR BLoc = locations[end]
+    VAR c = angularGCD(ALoc, BLoc)
+
+    FOR i = start+1; i < end; i++ DO
+        CLoc = locations[i]
+        a = angularGCD(BLoc, CLoc)
+        b = angularGCD(ALoc, CLoc)
+        d = 0
+        A = SLCAngle(b, c, a)
+        B = SLCAngle(a, c, b)
+
+        IF A > MATH.PI / 2  THEN
+            d = b
+        ELSE IF b > MATH.PI / 2 THEN
+            d = a
+        ELSE THEN
+            d = SLSSide(A, MATH.PI / 2, b)
+        ENDIF
+        IF d > d_max THEN
+            d_max = d
+            index = i
+        ENDIF
+    ENDFOR
+    RETURN d_max * EarthRadKm, index
+ENDFUNCTION

@@ -91,13 +91,13 @@ func calcDMax(locations []models.Coords) (float64, int, error) {
 		} else if B := SLCAngle(a, c, b); B >= math.Pi/2 {
 			d = a
 		} else {
-			d = SLSSide(A, math.Pi/2, b) * EarthRadKm
+			d = SLSSide(A, math.Pi/2, b)
 		}
 		if d > dMax {
 			dMax, index = d, i
 		}
 	}
-	return dMax, index, nil
+	return dMax * EarthRadKm, index, nil
 }
 
 func EncodePolyline(coords []models.Coords) string {
