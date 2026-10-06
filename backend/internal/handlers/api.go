@@ -51,7 +51,7 @@ func optimise(c *gin.Context) {
 
 	if checkIfAnyEqual(locations) {
 		// Return an error if any of the coordinates are equal
-		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": fmt.Sprintf("two or more locations had equal coordinates")})
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "two or more locations had equal coordinates"})
 		return
 	}
 
