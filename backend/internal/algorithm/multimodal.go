@@ -111,6 +111,7 @@ func changePolyline(leg *models.Leg) {
 	decimated, err := DecimateLine(polylineStr, RDPTolerance)
 	if err != nil {
 		log.Printf("error decimating polyline: %v", err)
+		return
 	}
 	leg.Polyline = decimated
 }
