@@ -119,12 +119,6 @@ func updateDists(mat *models.Matrix, locations []models.Coords, origins []int, d
 	// Update the distances to be road distances in a matrix by using an ORS request
 
 	// Validate the lengths of the arrays passed into the function
-	originsLength := len(originPairs)
-	destsLength := len(destPairs)
-	if originsLength != destsLength {
-		log.Printf("origins array is not same length as dests array, lengths %d and %d respectively", originsLength, destsLength)
-		return
-	}
 	originPairsLength := len(originPairs)
 	destPairsLength := len(destPairs)
 	if originPairsLength != destPairsLength {
