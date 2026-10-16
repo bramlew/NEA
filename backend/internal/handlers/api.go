@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"net/http"
 	"slices"
+	"time"
 
 	"github.com/bramlew/NEA/backend/internal/algorithm"
+	"github.com/bramlew/NEA/backend/internal/client"
 	"github.com/bramlew/NEA/backend/internal/models"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,7 +19,16 @@ const MinNoLocations = 2  // Minimum no. of locations which can be provided to t
 func Start() {
 	// Start the Gin server and optimisation route
 	router := gin.Default()
+
+	router.Use(cors.New(cors.Config{
+		AllowOrigins: []string{"http://localhost:5173"},
+		AllowMethods: []string{"POST", "GET"},
+		AllowHeaders: []string{"Content-Type"},
+		MaxAge:       12 * time.Hour,
+	}))
+
 	router.POST("/optimise", optimise)
+	router.GET("/geocode", geocode)
 	err := router.Run(":8080")
 	if err != nil {
 		return
@@ -82,6 +94,24 @@ func optimise(c *gin.Context) {
 		TotalWeight: tour.TotalWeight,
 	}
 	c.JSON(http.StatusOK, gin.H{"details": response})
+}
+
+func geocode(c *gin.Context) {
+	// Geocoding API route
+	location, exists := c.GetQuery("location")
+	if !exists {
+		// Return an error if a location was not provided in the request
+		c.JSON(http.StatusBadRequest, gin.H{"error": "no location provided"})
+		return
+	}
+	// Execute a geocode request
+	resolved, err := client.GeocodeRequest(location)
+	if err != nil {
+		// Return an error if the geocode request failed
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"coord": resolved})
 }
 
 func checkIfAnyEqual(coords []models.Coords) bool {

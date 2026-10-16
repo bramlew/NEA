@@ -6,6 +6,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"slices"
 	"time"
@@ -16,7 +17,9 @@ import (
 
 const EndpointMatrix = "https://api.heigit.org/openrouteservice/v2/matrix/driving-car"       // ORS API URL for Matrix endpoint
 const EndpointPolyline = "https://api.heigit.org/openrouteservice/v2/directions/driving-car" // ORS API URL for Polyline (directions) endpoint
+const EndpointGeocode = "https://api.heigit.org/pelias/v1/search"                            // ORS API URL for Geocoding
 const StandardDistanceUnit = "km"                                                            // Standard distance unit used throughout payloads
+const GeocodeRequestSize = 1                                                                 // No. of pairs of coordinates to be returned by the geocoding request
 
 var client = &http.Client{
 	// Create an HTTP client to be used for all ORS requests
@@ -165,6 +168,51 @@ func PolylineRequest(leg *models.Leg) (string, float64, error) {
 	routeDetails := resStruct.Routes[0]
 	polyline, distance := routeDetails.Geometry, routeDetails.Summary.Distance
 	return polyline, distance, nil
+}
+
+func GeocodeRequest(input string) (models.Coords, error) {
+	// Make an ORS request to geocode some string
+	apiKey := os.Getenv("ORS_API_KEY")
+
+	// Create the request and handle errors
+	fullUrl := fmt.Sprintf("%s?api_key=%s&text=%s&size=%d", EndpointGeocode, apiKey, url.QueryEscape(input), GeocodeRequestSize)
+	//log.Printf("full url: %s", fullUrl)
+	//fullUrl = strings.ReplaceAll(fullUrl, " ", "%20")
+	req, err := http.NewRequest("GET", fullUrl, nil)
+	if err != nil {
+		return models.Coords{}, fmt.Errorf("error creating request: %v", err)
+	}
+
+	req.Header.Add("Accept", "application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8")
+
+	// Execute the request and handle errors
+	res, err := client.Do(req)
+	if err != nil {
+		return models.Coords{}, fmt.Errorf("error sending request: %v", err)
+	}
+	defer res.Body.Close()
+	statusCode := res.StatusCode
+	if statusCode != http.StatusOK {
+		return models.Coords{}, fmt.Errorf("non-200 status code: %d", statusCode)
+	}
+
+	// Read the returned HTTP response and parse it
+	var resStruct models.GeocodeResponse
+	resBody, err := io.ReadAll(res.Body)
+	if err != nil {
+		return models.Coords{}, fmt.Errorf("error reading response: %v", err)
+	}
+	err = json.Unmarshal(resBody, &resStruct)
+	if err != nil {
+		return models.Coords{}, fmt.Errorf("error parsing json: %v", err)
+	}
+
+	// Return the coordinate pair corresponding to the string requested
+	coord := resStruct.Features[0].Geometry.Coordinates
+	return models.Coords{
+		Lon: coord[0],
+		Lat: coord[1],
+	}, nil
 }
 
 func parseCoordsList(coords []models.Coords) [][]float64 {
