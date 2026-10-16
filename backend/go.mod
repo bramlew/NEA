@@ -1,6 +1,6 @@
 module github.com/bramlew/NEA/backend
 
-go 1.27.1
+go 1.27.2
 
 require (
 	github.com/gin-contrib/cors v1.7.9
