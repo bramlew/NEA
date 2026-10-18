@@ -3,20 +3,24 @@
     import { onDestroy, onMount } from "svelte"
     import Globe, { type GlobeInstance } from "globe.gl"
     import { decode } from "@googlemaps/polyline-codec"
-    import type { Response } from "#lib/types.ts";
+    import type { KeyedLeg } from "#lib/types.ts";
 
-    let { routeData } : { routeData: Response } = $props()
+    let { legs } : { legs: KeyedLeg[] } = $props()
 
     let globeContainer: HTMLElement
     let globe: GlobeInstance
-    let roadRoutes = $derived(routeData.details.route.filter(leg => leg.isRoad))
-    let roadRoutesPaths = $derived(roadRoutes.map(leg => decode(leg.polyline)))
-    let airRoutes = $derived(routeData.details.route.filter(leg => !leg.isRoad))
+    let roadRoutes = $derived(legs.filter(leg => leg.details.isRoad))
+    let roadRoutesPaths = $derived(roadRoutes.map(leg => { return {
+        route: decode(leg.details.polyline),
+        label: `Leg ${leg.id}`
+    }}))
+    let airRoutes = $derived(legs.filter(leg => !leg.details.isRoad))
     let airRoutesArcs = $derived(airRoutes.map(leg => { return {
-        startLat: leg.origin.lat,
-        startLng: leg.origin.lon,
-        endLat: leg.dest.lat,
-        endLng: leg.dest.lon
+        startLat: leg.details.origin.lat,
+        startLng: leg.details.origin.lon,
+        endLat: leg.details.dest.lat,
+        endLng: leg.details.dest.lon,
+        label: `Leg ${leg.id}`
     }}))
     let width = $state(0)
     let height = $state(0)
@@ -35,8 +39,12 @@
 
     $effect(() => {
         globe.pathsData(roadRoutesPaths)
+            .pathPoints("route")
+            .pathLabel("label")
+            .pathPointAlt(0)
             .arcsData(airRoutesArcs)
             .arcAltitudeAutoScale(0.3)
+            .arcLabel("label")
     })
 
 </script>

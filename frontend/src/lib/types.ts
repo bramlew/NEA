@@ -20,7 +20,7 @@ export type Leg = {
 
 export type KeyedLeg = {
     id: number
-    leg: Leg
+    details: Leg
 }
 
 export type GeocodeResponse = {
