@@ -123,11 +123,11 @@
                 <legend class="legend">Enter coordinates</legend>
                 <label class="label">
                     <span class="label-text">Longitude</span>
-                    <input class="input" type="number" placeholder=0 bind:value={lon} min=-180 max=180 required />
+                    <input class="input" type="number" placeholder=0 bind:value={lon} min=-180 max=180 step="any" required />
                 </label>
                 <label class="label">
                     <span class="label-text">Latitude</span>
-                    <input class="input" type="number" placeholder=0 bind:value={lat} min=-90 max=90 required />
+                    <input class="input" type="number" placeholder=0 bind:value={lat} min=-90 max=90 step="any" required />
                 </label>
             {:else if type === "loc"}
                 <legend class="legend">Enter location</legend>
