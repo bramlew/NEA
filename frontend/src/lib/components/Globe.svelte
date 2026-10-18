@@ -41,7 +41,7 @@
         globe.pathsData(roadRoutesPaths)
             .pathPoints("route")
             .pathLabel("label")
-            .pathPointAlt(0)
+            .pathPointAlt(0.00001)
             .arcsData(airRoutesArcs)
             .arcAltitudeAutoScale(0.3)
             .arcLabel("label")
