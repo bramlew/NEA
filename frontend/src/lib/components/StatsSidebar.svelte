@@ -10,7 +10,7 @@
 <div class="flex-1">
     <h3 class="h3">Route stats</h3>
     {#if legs.length > 0}
-        <h6 class="h6">Total route length: {totalWeight}</h6>
+        <h6 class="h6">Total route length: {Math.round(totalWeight)} km</h6>
         <Accordion collapsible>
             {#each legs as leg (leg.id)}
                 <Accordion.Item value={leg.id.toString()}>
