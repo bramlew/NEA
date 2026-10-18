@@ -7,7 +7,7 @@
     let legs: KeyedLeg[] = $derived(routeData.details.route.map((leg: Leg, i: number) => { return { id: i+1, leg: leg} }))
 </script>
 
-<div class="mx-auto flex-1">
+<div class="flex-1">
     <h3 class="h3">Some stats</h3>
     <Accordion collapsible>
         {#each legs as leg (leg.id)}
