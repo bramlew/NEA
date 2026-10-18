@@ -1,5 +1,4 @@
 <script lang="ts">
-
     import { onDestroy, onMount } from "svelte"
     import Globe, { type GlobeInstance } from "globe.gl"
     import { decode } from "@googlemaps/polyline-codec"
