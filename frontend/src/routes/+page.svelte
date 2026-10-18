@@ -4,11 +4,13 @@
     import StatsSidebar from "#lib/components/StatsSidebar.svelte";
     import type { KeyedLeg, Response } from "#lib/types.ts"
 
+    // Initialise reactive properties of the route to be passed into other components
     let routeData: Response = $state({ details: { route: [], totalWeight: 0 } })
     let legs: KeyedLeg[] = $derived(routeData.details.route.map((leg, i) => { return { id: i+1, details: leg} }))
     let totalWeight = $derived(routeData.details.totalWeight)
 
     const initRouteData = (data: Response) => {
+        // Initialise route data form request
         routeData = data
     }
 </script>
