@@ -11,7 +11,7 @@
     }
 </script>
 
-<div class="mx-auto flex">
+<div class="flex">
     <LocationInput { initRouteData } />
     <Globe {routeData} />
     <StatsSidebar { routeData } />

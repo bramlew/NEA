@@ -89,6 +89,14 @@ func optimise(c *gin.Context) {
 	// Add the polylines to the legs array
 	algorithm.AddPolylines(legs)
 
+	// Check that every road route actually has a polyline
+	for _, leg := range legs {
+		if leg.IsRoad && leg.Polyline == "" {
+			c.JSON(http.StatusBadGateway, gin.H{"error": "polylines failed to resolve"})
+			return
+		}
+	}
+
 	response := models.Response{
 		Route:       legs,
 		TotalWeight: tour.TotalWeight,

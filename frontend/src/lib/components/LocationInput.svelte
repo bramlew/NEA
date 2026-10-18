@@ -99,7 +99,7 @@
     }
 </script>
 
-<div class="mx-auto flex-1">
+<div class="flex-1">
     <form class="card mx-auto" onsubmit={updateLocList}>
         <header>
             <h3 class="h3">Location input</h3>
@@ -109,7 +109,7 @@
             <label class="label">
                 <span class="label-text">Coordinates or location</span>
                 <label class="label flex">
-                    <input class="radio" type="radio" checked name="locInType" value="coords" bind:group={type} />
+                    <input class="radio" type="radio" name="locInType" value="coords" bind:group={type} checked />
                     <span class="label-text">Coordinates</span>
                 </label>
                 <label class="label flex">
@@ -123,11 +123,11 @@
                 <legend class="legend">Enter coordinates</legend>
                 <label class="label">
                     <span class="label-text">Longitude</span>
-                    <input class="input" type="number" placeholder=0 bind:value={lon} min=-180 max=180 required />
+                    <input class="input" type="number" placeholder=0 bind:value={lon} min=-180 max=180 step="any" required />
                 </label>
                 <label class="label">
                     <span class="label-text">Latitude</span>
-                    <input class="input" type="number" placeholder=0 bind:value={lat} min=-90 max=90 required />
+                    <input class="input" type="number" placeholder=0 bind:value={lat} min=-90 max=90 step="any" required />
                 </label>
             {:else if type === "loc"}
                 <legend class="legend">Enter location</legend>
