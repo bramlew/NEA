@@ -42,6 +42,7 @@
 		"#lib/*": "./src/lib/*"
 	},
 	"dependencies": {
+		"@googlemaps/polyline-codec": "^1.0.28",
 		"globe.gl": "^2.46.2"
 	}
 }

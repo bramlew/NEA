@@ -13,6 +13,6 @@
 
 <div class="mx-auto flex">
     <LocationInput { initRouteData } />
-    <Globe />
+    <Globe {routeData} />
     <StatsSidebar { routeData } />
 </div>
