@@ -176,8 +176,6 @@ func GeocodeRequest(input string) (models.Coords, error) {
 
 	// Create the request and handle errors
 	fullUrl := fmt.Sprintf("%s?api_key=%s&text=%s&size=%d", EndpointGeocode, apiKey, url.QueryEscape(input), GeocodeRequestSize)
-	//log.Printf("full url: %s", fullUrl)
-	//fullUrl = strings.ReplaceAll(fullUrl, " ", "%20")
 	req, err := http.NewRequest("GET", fullUrl, nil)
 	if err != nil {
 		return models.Coords{}, fmt.Errorf("error creating request: %v", err)
