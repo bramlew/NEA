@@ -15,13 +15,15 @@
     let height = $state(0)
 
     // Derive route data that can be displayed onto the globe
-    let roadRoutes = $derived(legs.filter(leg => leg.details.isRoad))
-    let roadRoutesPaths = $derived(roadRoutes.map(leg => { return {
+    let roadRoutes = $derived(legs
+        .filter(leg => leg.details.isRoad)
+        .map(leg => { return {
         route: decode(leg.details.polyline),
         label: `Leg ${leg.id}`
     }}))
-    let airRoutes = $derived(legs.filter(leg => !leg.details.isRoad))
-    let airRoutesArcs = $derived(airRoutes.map(leg => { return {
+    let airRoutes = $derived(legs
+        .filter(leg => !leg.details.isRoad)
+        .map(leg => { return {
         startLat: leg.details.origin.lat,
         startLng: leg.details.origin.lon,
         endLat: leg.details.dest.lat,
@@ -46,11 +48,11 @@
 
     $effect(() => {
         // If new paths/arcs are derived, update the data on the globe to reflect this change
-        globe.pathsData(roadRoutesPaths)
+        globe.pathsData(roadRoutes)
             .pathPoints("route")
             .pathLabel("label")
             .pathPointAlt(0.00001)
-            .arcsData(airRoutesArcs)
+            .arcsData(airRoutes)
             .arcAltitudeAutoScale(0.3)
             .arcLabel("label")
     })
