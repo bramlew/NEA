@@ -37,6 +37,13 @@
         globe = new Globe(globeContainer)
             .globeTileEngineUrl((x, y, l) => `https://tiles.versatiles.org/tiles/satellite/${l}/${x}/${y}`)
             .backgroundColor("#091224")
+            .pathPoints("route")
+            .pathLabel("label")
+            .pathTransitionDuration(0)
+            .pathPointAlt(0.00001)
+            .arcLabel("label")
+            .arcsTransitionDuration(0)
+            .arcAltitudeAutoScale(0.3)
     })
 
     onDestroy(() => globe._destructor()) // Destroy the globe if the DOM element is destroyed
@@ -49,12 +56,7 @@
     $effect(() => {
         // If new paths/arcs are derived, update the data on the globe to reflect this change
         globe.pathsData(roadRoutes)
-            .pathPoints("route")
-            .pathLabel("label")
-            .pathPointAlt(0.00001)
             .arcsData(airRoutes)
-            .arcAltitudeAutoScale(0.3)
-            .arcLabel("label")
     })
 
 </script>
